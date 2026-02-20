@@ -35,7 +35,7 @@ final class SettingsStore: ObservableObject {
     }
 
     init() {
-        baseURL = UserDefaults.standard.string(forKey: "baseURL") ?? "http://localhost:8069"
+        baseURL = UserDefaults.standard.string(forKey: "baseURL") ?? "https://polarity-backend-hudjhuhbta-ue.a.run.app"
         notificationsEnabled = UserDefaults.standard.bool(forKey: "notificationsEnabled")
         notifyHour = UserDefaults.standard.object(forKey: "notifyHour") as? Int ?? 8
         notifyMinute = UserDefaults.standard.object(forKey: "notifyMinute") as? Int ?? 0

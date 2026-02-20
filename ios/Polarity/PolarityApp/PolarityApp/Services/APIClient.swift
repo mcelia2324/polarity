@@ -3,7 +3,7 @@ import Foundation
 actor APIClient {
     static let shared = APIClient()
 
-    var baseURL: URL = URL(string: "http://localhost:8069")!
+    var baseURL: URL = URL(string: "https://polarity-backend-hudjhuhbta-ue.a.run.app")!
 
     private struct DeviceRegisterPayload: Encodable {
         let token: String
