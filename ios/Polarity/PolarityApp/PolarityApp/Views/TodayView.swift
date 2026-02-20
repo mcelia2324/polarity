@@ -39,7 +39,17 @@ struct TodayView: View {
 
                         DailyPromptCard(wordA: pair.wordA, wordB: pair.wordB)
                     } else if isLoading {
-                        ProgressView("Loading...")
+                        Spacer()
+                        VStack(spacing: 16) {
+                            ProgressView()
+                                .tint(Theme.accent)
+                                .scaleEffect(1.5)
+                            Text("Loading today's polarity…")
+                                .font(.subheadline)
+                                .foregroundColor(Theme.muted)
+                        }
+                        .frame(maxWidth: .infinity)
+                        Spacer()
                     } else {
                         Text(errorMessage ?? "Unable to load today's words.")
                             .foregroundColor(.red)

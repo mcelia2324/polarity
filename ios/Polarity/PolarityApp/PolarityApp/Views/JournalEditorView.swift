@@ -22,8 +22,13 @@ struct JournalEditorView: View {
                 Spacer()
             }
             .padding()
+            .scrollDismissesKeyboard(.interactively)
+            .onTapGesture { UIApplication.shared.sendAction(#selector(UIResponder.resignFirstResponder), to: nil, from: nil, for: nil) }
             .navigationTitle("Journal")
             .toolbar {
+                ToolbarItem(placement: .keyboard) {
+                    Button("Done") { UIApplication.shared.sendAction(#selector(UIResponder.resignFirstResponder), to: nil, from: nil, for: nil) }
+                }
                 ToolbarItem(placement: .confirmationAction) {
                     Button("Save") {
                         journalStore.addOrUpdate(date: date, wordA: wordA, wordB: wordB, note: note)
