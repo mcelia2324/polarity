@@ -12,8 +12,10 @@ struct TodayView: View {
     var body: some View {
         GeometryReader { proxy in
             ScrollView {
-                VStack(alignment: .leading, spacing: 20) {
+                VStack(spacing: 0) {
                     if let pair = wordPair {
+                        Spacer(minLength: 24)
+
                         WordPairCard(
                             title: "Today's Polarity",
                             subtitle: formattedDate(pair.date),
@@ -34,10 +36,36 @@ struct TodayView: View {
                         )
 
                         Text("Reflect on the meanings, differences, and which calibrates higher.")
+                            .font(.subheadline)
                             .foregroundColor(Theme.muted)
-                            .padding(.horizontal, 6)
+                            .multilineTextAlignment(.center)
+                            .padding(.horizontal, 32)
+                            .padding(.top, 20)
 
                         DailyPromptCard(wordA: pair.wordA, wordB: pair.wordB)
+                            .padding(.top, 20)
+
+                        Spacer(minLength: 24)
+
+                        Button {
+                            showJournal = true
+                        } label: {
+                            Label("Journal", systemImage: "square.and.pencil")
+                                .font(.system(size: 17, weight: .semibold, design: .rounded))
+                                .padding(.vertical, 14)
+                                .frame(maxWidth: .infinity)
+                                .background(Theme.accent)
+                                .foregroundColor(.white)
+                                .clipShape(Capsule())
+                        }
+                        .padding(.top, 8)
+
+                        Text("Inspired by the work of David R. Hawkins.")
+                            .font(.caption)
+                            .foregroundColor(Theme.muted.opacity(0.7))
+                            .padding(.top, 12)
+                            .padding(.bottom, 20)
+
                     } else if isLoading {
                         Spacer()
                         VStack(spacing: 16) {
@@ -51,48 +79,20 @@ struct TodayView: View {
                         .frame(maxWidth: .infinity)
                         Spacer()
                     } else {
+                        Spacer()
                         Text(errorMessage ?? "Unable to load today's words.")
                             .foregroundColor(.red)
+                            .multilineTextAlignment(.center)
+                        Spacer()
                     }
-
-                    Spacer(minLength: 12)
                 }
-                .padding(.horizontal, 20)
-                .padding(.top, 20)
-                .padding(.bottom, 12)
-                .frame(minHeight: proxy.size.height, alignment: .top)
+                .padding(.horizontal, 24)
+                .frame(minHeight: proxy.size.height)
             }
             .scrollIndicators(.hidden)
         }
         .task {
             await load()
-        }
-        .safeAreaInset(edge: .bottom) {
-            VStack(spacing: 10) {
-                if wordPair != nil {
-                    Button {
-                        showJournal = true
-                    } label: {
-                        Label("Journal", systemImage: "square.and.pencil")
-                            .font(.system(size: 16, weight: .semibold, design: .rounded))
-                            .padding(.vertical, 11)
-                            .padding(.horizontal, 26)
-                            .background(Theme.accent)
-                            .foregroundColor(.white)
-                            .clipShape(Capsule())
-                    }
-                }
-
-                Text("Inspired by the work of David R. Hawkins.")
-                    .font(.footnote)
-                    .foregroundColor(Theme.muted.opacity(0.9))
-                    .frame(maxWidth: .infinity, alignment: .center)
-            }
-            .frame(maxWidth: .infinity)
-            .padding(.horizontal, 20)
-            .padding(.top, 8)
-            .padding(.bottom, 6)
-            .background(Theme.background.opacity(0.94))
         }
         .sheet(isPresented: $showJournal) {
             if let pair = wordPair {
@@ -147,15 +147,17 @@ private struct DailyPromptCard: View {
     }
 
     var body: some View {
-        VStack(alignment: .leading, spacing: 8) {
+        VStack(spacing: 10) {
             Label("Reflection Prompt", systemImage: "sparkles")
                 .font(.footnote.weight(.semibold))
                 .foregroundColor(Theme.accentDark)
+                .frame(maxWidth: .infinity, alignment: .leading)
 
             Text(prompt)
                 .font(.subheadline)
                 .foregroundColor(Theme.muted)
                 .fixedSize(horizontal: false, vertical: true)
+                .frame(maxWidth: .infinity, alignment: .leading)
         }
         .cardStyle()
     }
@@ -181,7 +183,9 @@ private struct DefinitionSheetView: View {
                 .fixedSize(horizontal: false, vertical: true)
             Spacer(minLength: 0)
         }
+        .frame(maxWidth: .infinity, alignment: .leading)
         .padding(24)
+        .background(Theme.card)
         .presentationDetents([.fraction(0.34), .medium])
         .presentationDragIndicator(.visible)
     }

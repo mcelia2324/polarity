@@ -1,13 +1,18 @@
 import SwiftUI
 
 enum Theme {
-    static let background = Color(red: 0.96, green: 0.94, blue: 0.91)
-    static let backgroundTop = Color(red: 0.92, green: 0.88, blue: 0.82)
-    static let card = Color(red: 1.0, green: 0.98, blue: 0.95)
+    // Adaptive colors that work in both light and dark mode
+    static let background = Color("background", bundle: nil)
+    static let backgroundTop = Color("backgroundTop", bundle: nil)
+    static let card = Color("card", bundle: nil)
     static let accent = Color(red: 0.71, green: 0.36, blue: 0.18)
-    static let accentDark = Color(red: 0.48, green: 0.22, blue: 0.09)
-    static let ink = Color(red: 0.12, green: 0.10, blue: 0.09)
-    static let muted = Color(red: 0.42, green: 0.37, blue: 0.32)
+    static let accentDark = Color("accentDark", bundle: nil)
+    static let ink = Color("ink", bundle: nil)
+    static let muted = Color("muted", bundle: nil)
+
+    // Fallbacks for when color assets aren't available
+    static let backgroundLight = Color(red: 0.96, green: 0.94, blue: 0.91)
+    static let backgroundDark = Color(red: 0.11, green: 0.11, blue: 0.12)
 
     static let appBackground = LinearGradient(
         colors: [backgroundTop, background],

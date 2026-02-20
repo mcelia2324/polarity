@@ -25,25 +25,29 @@ struct WordPairCard: View {
     }
 
     var body: some View {
-        VStack(alignment: .leading, spacing: 12) {
+        VStack(spacing: 16) {
             Text(subtitle.uppercased())
                 .font(.caption)
                 .foregroundColor(Theme.muted)
-                .tracking(1.2)
+                .tracking(1.4)
+
             Text(title)
                 .font(.title2.weight(.semibold))
                 .foregroundColor(Theme.ink)
-            HStack(spacing: 12) {
+
+            HStack(spacing: 14) {
                 wordButton(label: wordA.capitalized, action: onTapWordA)
                 Text("vs")
-                    .font(.system(size: 18, weight: .semibold, design: .rounded))
+                    .font(.system(size: 16, weight: .medium, design: .rounded))
                     .foregroundColor(Theme.muted)
                 wordButton(label: wordB.capitalized, action: onTapWordB)
             }
+
             Text("Tap a word for its definition.")
-                .font(.footnote)
-                .foregroundColor(Theme.muted)
+                .font(.caption)
+                .foregroundColor(Theme.muted.opacity(0.8))
         }
+        .frame(maxWidth: .infinity)
         .cardStyle()
     }
 
@@ -52,18 +56,18 @@ struct WordPairCard: View {
         if let action {
             Button(action: action) {
                 Text(label)
-                    .font(.system(size: 32, weight: .semibold, design: .serif))
+                    .font(.system(size: 30, weight: .semibold, design: .serif))
                     .foregroundColor(Theme.ink)
                     .lineLimit(1)
-                    .minimumScaleFactor(0.7)
+                    .minimumScaleFactor(0.6)
             }
             .buttonStyle(.plain)
         } else {
             Text(label)
-                .font(.system(size: 32, weight: .semibold, design: .serif))
+                .font(.system(size: 30, weight: .semibold, design: .serif))
                 .foregroundColor(Theme.ink)
                 .lineLimit(1)
-                .minimumScaleFactor(0.7)
+                .minimumScaleFactor(0.6)
         }
     }
 }
