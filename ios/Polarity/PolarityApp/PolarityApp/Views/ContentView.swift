@@ -39,6 +39,7 @@ struct ContentView: View {
             Task {
                 await APIClient.shared.updateBaseURL(settings.baseURL)
             }
+            notificationManager.registerIfEnabled(settings: settings)
         }
         .onChange(of: settings.notificationsEnabled) { _ in
             notificationManager.updateServerToggle(settings: settings)

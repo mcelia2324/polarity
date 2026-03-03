@@ -8,6 +8,8 @@ struct WordPairCard: View {
     let onTapWordA: (() -> Void)?
     let onTapWordB: (() -> Void)?
 
+    @State private var wordsVisible = false
+
     init(
         title: String,
         subtitle: String,
@@ -37,18 +39,31 @@ struct WordPairCard: View {
 
             HStack(spacing: 14) {
                 wordButton(label: wordA.capitalized, action: onTapWordA)
+                    .scaleEffect(wordsVisible ? 1 : 0.7)
+                    .opacity(wordsVisible ? 1 : 0)
+
                 Text("vs")
                     .font(.system(size: 16, weight: .medium, design: .rounded))
                     .foregroundColor(Theme.muted)
+                    .opacity(wordsVisible ? 1 : 0)
+
                 wordButton(label: wordB.capitalized, action: onTapWordB)
+                    .scaleEffect(wordsVisible ? 1 : 0.7)
+                    .opacity(wordsVisible ? 1 : 0)
             }
 
             Text("Tap a word for its definition.")
                 .font(.caption)
                 .foregroundColor(Theme.muted.opacity(0.8))
+                .opacity(wordsVisible ? 1 : 0)
         }
         .frame(maxWidth: .infinity)
         .cardStyle()
+        .onAppear {
+            withAnimation(.spring(response: 0.7, dampingFraction: 0.6).delay(0.15)) {
+                wordsVisible = true
+            }
+        }
     }
 
     @ViewBuilder

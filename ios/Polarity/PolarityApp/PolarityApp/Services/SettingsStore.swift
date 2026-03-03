@@ -35,7 +35,10 @@ final class SettingsStore: ObservableObject {
     }
 
     init() {
-        baseURL = UserDefaults.standard.string(forKey: "baseURL") ?? "https://polarity-backend-hudjhuhbta-ue.a.run.app"
+        // Register explicit defaults so iCloud is off for new installs
+        UserDefaults.standard.register(defaults: ["iCloudEnabled": false])
+
+        baseURL = UserDefaults.standard.string(forKey: "baseURL") ?? "https://polarity-backend-772881056162.us-east1.run.app"
         notificationsEnabled = UserDefaults.standard.bool(forKey: "notificationsEnabled")
         notifyHour = UserDefaults.standard.object(forKey: "notifyHour") as? Int ?? 8
         notifyMinute = UserDefaults.standard.object(forKey: "notifyMinute") as? Int ?? 0

@@ -45,7 +45,7 @@ struct SettingsView: View {
                         .onChange(of: settings.iCloudEnabled) { _ in
                             journalStore.refreshStorageLocation()
                         }
-                    Text("Your journal stays on-device. Enabling iCloud sync stores it in your private iCloud Drive.")
+                    Text("Your journal stays on-device by default. Enabling iCloud sync stores it in your private iCloud Drive.")
                         .font(.caption)
                         .foregroundColor(Theme.muted)
                 }

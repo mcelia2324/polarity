@@ -7,6 +7,11 @@ struct TodayView: View {
     @State private var showJournal = false
     @State private var selectedDefinition: DefinitionSheetItem?
 
+    // Animation states
+    @State private var showCard = false
+    @State private var showPrompt = false
+    @State private var showButton = false
+
     @ObservedObject var journalStore: JournalStore
 
     var body: some View {
@@ -34,6 +39,8 @@ struct TodayView: View {
                                 )
                             }
                         )
+                        .opacity(showCard ? 1 : 0)
+                        .offset(y: showCard ? 0 : 30)
 
                         Text("Reflect on the meanings, differences, and which calibrates higher.")
                             .font(.subheadline)
@@ -41,9 +48,13 @@ struct TodayView: View {
                             .multilineTextAlignment(.center)
                             .padding(.horizontal, 32)
                             .padding(.top, 20)
+                            .opacity(showCard ? 1 : 0)
+                            .offset(y: showCard ? 0 : 20)
 
                         DailyPromptCard(wordA: pair.wordA, wordB: pair.wordB)
                             .padding(.top, 20)
+                            .opacity(showPrompt ? 1 : 0)
+                            .offset(y: showPrompt ? 0 : 24)
 
                         Spacer(minLength: 24)
 
@@ -59,12 +70,15 @@ struct TodayView: View {
                                 .clipShape(Capsule())
                         }
                         .padding(.top, 8)
+                        .opacity(showButton ? 1 : 0)
+                        .offset(y: showButton ? 0 : 18)
 
                         Text("Inspired by the work of David R. Hawkins.")
                             .font(.caption)
                             .foregroundColor(Theme.muted.opacity(0.7))
                             .padding(.top, 12)
                             .padding(.bottom, 20)
+                            .opacity(showButton ? 1 : 0)
 
                     } else if isLoading {
                         Spacer()
@@ -80,9 +94,26 @@ struct TodayView: View {
                         Spacer()
                     } else {
                         Spacer()
-                        Text(errorMessage ?? "Unable to load today's words.")
-                            .foregroundColor(.red)
-                            .multilineTextAlignment(.center)
+                        VStack(spacing: 16) {
+                            Image(systemName: "wifi.slash")
+                                .font(.system(size: 40))
+                                .foregroundColor(Theme.muted.opacity(0.4))
+                            Text(errorMessage ?? "Unable to load today's words.")
+                                .font(.subheadline)
+                                .foregroundColor(Theme.muted)
+                                .multilineTextAlignment(.center)
+                            Button {
+                                Task { await load() }
+                            } label: {
+                                Label("Try Again", systemImage: "arrow.clockwise")
+                                    .font(.system(size: 15, weight: .semibold, design: .rounded))
+                                    .padding(.horizontal, 24)
+                                    .padding(.vertical, 10)
+                                    .background(Theme.accent)
+                                    .foregroundColor(.white)
+                                    .clipShape(Capsule())
+                            }
+                        }
                         Spacer()
                     }
                 }
@@ -90,6 +121,9 @@ struct TodayView: View {
                 .frame(minHeight: proxy.size.height)
             }
             .scrollIndicators(.hidden)
+            .refreshable {
+                await load()
+            }
         }
         .task {
             await load()
@@ -124,10 +158,26 @@ struct TodayView: View {
         do {
             isLoading = true
             errorMessage = nil
+            // Reset animations for fresh entrance
+            showCard = false
+            showPrompt = false
+            showButton = false
             let pair = try await APIClient.shared.fetchWordOfDay()
             await MainActor.run {
                 self.wordPair = pair
                 self.isLoading = false
+            }
+            // Staggered entrance animations
+            withAnimation(.spring(response: 0.6, dampingFraction: 0.8)) {
+                showCard = true
+            }
+            try? await Task.sleep(nanoseconds: 200_000_000)
+            withAnimation(.spring(response: 0.5, dampingFraction: 0.8)) {
+                showPrompt = true
+            }
+            try? await Task.sleep(nanoseconds: 150_000_000)
+            withAnimation(.spring(response: 0.5, dampingFraction: 0.8)) {
+                showButton = true
             }
         } catch {
             await MainActor.run {

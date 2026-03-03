@@ -3,7 +3,27 @@ import Foundation
 actor APIClient {
     static let shared = APIClient()
 
-    var baseURL: URL = URL(string: "https://polarity-backend-hudjhuhbta-ue.a.run.app")!
+    var baseURL: URL = URL(string: "https://polarity-backend-772881056162.us-east1.run.app")!
+
+    private let cacheKey = "cachedWordPair"
+
+    private func cachedPairForToday() -> WordPair? {
+        guard let data = UserDefaults.standard.data(forKey: cacheKey),
+              let pair = try? JSONDecoder().decode(WordPair.self, from: data) else {
+            return nil
+        }
+        let formatter = DateFormatter()
+        formatter.dateFormat = "yyyy-MM-dd"
+        formatter.locale = Locale(identifier: "en_US_POSIX")
+        let todayString = formatter.string(from: Date())
+        return pair.date == todayString ? pair : nil
+    }
+
+    private func cachePair(_ pair: WordPair) {
+        if let data = try? JSONEncoder().encode(pair) {
+            UserDefaults.standard.set(data, forKey: cacheKey)
+        }
+    }
 
     private struct DeviceRegisterPayload: Encodable {
         let token: String
@@ -35,16 +55,23 @@ actor APIClient {
     }
 
     func fetchWordOfDay() async throws -> WordPair {
+        // Return cached pair immediately if we already have today's
+        if let cached = cachedPairForToday() {
+            return cached
+        }
+
         let url = baseURL.appendingPathComponent("api/word-of-day")
         let (data, _) = try await URLSession.shared.data(from: url)
         let response = try JSONDecoder().decode(WordPairResponse.self, from: data)
-        return WordPair(
+        let pair = WordPair(
             date: response.date,
             wordA: response.wordA,
             wordB: response.wordB,
             wordADefinition: response.wordADefinition,
             wordBDefinition: response.wordBDefinition
         )
+        cachePair(pair)
+        return pair
     }
 
     func fetchHistory(days: Int) async throws -> [WordPair] {
