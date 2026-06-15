@@ -21,7 +21,7 @@ struct ContentView: View {
                         Label("Journal", systemImage: "book.closed")
                     }
 
-                HistoryView()
+                HistoryView(journalStore: journalStore)
                     .tabItem {
                         Label("History", systemImage: "clock.arrow.circlepath")
                     }
@@ -33,6 +33,7 @@ struct ContentView: View {
             }
         }
         .accentColor(Theme.accent)
+        .preferredColorScheme(settings.appearance.colorScheme)
         .toolbarBackground(Theme.card.opacity(0.98), for: .tabBar)
         .toolbarBackground(.visible, for: .tabBar)
         .onAppear {

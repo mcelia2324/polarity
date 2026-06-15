@@ -5,7 +5,7 @@ actor APIClient {
 
     var baseURL: URL = URL(string: "https://polarity-backend-772881056162.us-east1.run.app")!
 
-    private let cacheKey = "cachedWordPair"
+    private let cacheKey = "cachedWordPairV3"
 
     private func cachedPairForToday() -> WordPair? {
         guard let data = UserDefaults.standard.data(forKey: cacheKey),
@@ -61,14 +61,18 @@ actor APIClient {
         }
 
         let url = baseURL.appendingPathComponent("api/word-of-day")
-        let (data, _) = try await URLSession.shared.data(from: url)
+        var request = URLRequest(url: url)
+        request.cachePolicy = .reloadIgnoringLocalCacheData
+        let (data, _) = try await URLSession.shared.data(for: request)
         let response = try JSONDecoder().decode(WordPairResponse.self, from: data)
         let pair = WordPair(
             date: response.date,
             wordA: response.wordA,
             wordB: response.wordB,
             wordADefinition: response.wordADefinition,
-            wordBDefinition: response.wordBDefinition
+            wordBDefinition: response.wordBDefinition,
+            quote: response.quote,
+            quoteAuthor: response.quoteAuthor
         )
         cachePair(pair)
         return pair
@@ -86,7 +90,9 @@ actor APIClient {
                 wordA: $0.wordA,
                 wordB: $0.wordB,
                 wordADefinition: $0.wordADefinition,
-                wordBDefinition: $0.wordBDefinition
+                wordBDefinition: $0.wordBDefinition,
+                quote: $0.quote,
+                quoteAuthor: $0.quoteAuthor
             )
         }
     }

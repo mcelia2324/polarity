@@ -37,6 +37,31 @@ final class JournalStore: ObservableObject {
         entries.first { Calendar.current.isDate($0.date, inSameDayAs: date) }
     }
 
+    func entry(forDateString dateString: String) -> JournalEntry? {
+        let parser = DateFormatter()
+        parser.dateFormat = "yyyy-MM-dd"
+        parser.locale = Locale(identifier: "en_US_POSIX")
+        guard let date = parser.date(from: dateString) else { return nil }
+        return entry(for: date)
+    }
+
+    var currentStreak: Int {
+        let calendar = Calendar.current
+        var checkDate = calendar.startOfDay(for: Date())
+        // If no entry today, start counting from yesterday
+        if !entries.contains(where: { calendar.isDate($0.date, inSameDayAs: checkDate) }) {
+            guard let yesterday = calendar.date(byAdding: .day, value: -1, to: checkDate) else { return 0 }
+            checkDate = yesterday
+        }
+        var streak = 0
+        while entries.contains(where: { calendar.isDate($0.date, inSameDayAs: checkDate) }) {
+            streak += 1
+            guard let prev = calendar.date(byAdding: .day, value: -1, to: checkDate) else { break }
+            checkDate = prev
+        }
+        return streak
+    }
+
     func refreshStorageLocation() {
         load()
     }

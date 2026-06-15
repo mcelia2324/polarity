@@ -49,7 +49,17 @@ struct SettingsView: View {
                         .font(.caption)
                         .foregroundColor(Theme.muted)
                 }
+
+                Section(header: Text("Appearance")) {
+                    Picker("Theme", selection: $settings.appearance) {
+                        ForEach(AppAppearance.allCases) { option in
+                            Text(option.label).tag(option)
+                        }
+                    }
+                    .pickerStyle(.segmented)
+                }
             }
+            .readableWidth()
             .scrollContentBackground(.hidden)
             .background(Color.clear)
             .navigationTitle("Settings")

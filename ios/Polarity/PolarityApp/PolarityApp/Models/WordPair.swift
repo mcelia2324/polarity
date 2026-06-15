@@ -7,6 +7,8 @@ struct WordPair: Codable, Identifiable {
     let wordB: String
     let wordADefinition: String?
     let wordBDefinition: String?
+    let quote: String?
+    let quoteAuthor: String?
 
     enum CodingKeys: String, CodingKey {
         case date
@@ -14,6 +16,8 @@ struct WordPair: Codable, Identifiable {
         case wordB = "word_b"
         case wordADefinition = "word_a_definition"
         case wordBDefinition = "word_b_definition"
+        case quote
+        case quoteAuthor = "quote_author"
     }
 }
 
@@ -23,6 +27,8 @@ struct WordPairResponse: Codable {
     let wordB: String
     let wordADefinition: String?
     let wordBDefinition: String?
+    let quote: String?
+    let quoteAuthor: String?
 
     enum CodingKeys: String, CodingKey {
         case date
@@ -30,6 +36,8 @@ struct WordPairResponse: Codable {
         case wordB = "word_b"
         case wordADefinition = "word_a_definition"
         case wordBDefinition = "word_b_definition"
+        case quote
+        case quoteAuthor = "quote_author"
     }
 }
 

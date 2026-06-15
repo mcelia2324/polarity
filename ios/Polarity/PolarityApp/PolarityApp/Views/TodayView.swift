@@ -14,12 +14,28 @@ struct TodayView: View {
 
     @ObservedObject var journalStore: JournalStore
 
+    private var streak: Int { journalStore.currentStreak }
+
     var body: some View {
-        GeometryReader { proxy in
+        VStack(spacing: 0) {
             ScrollView {
-                VStack(spacing: 0) {
-                    if let pair = wordPair {
-                        Spacer(minLength: 24)
+                if let pair = wordPair {
+                    VStack(spacing: 0) {
+                        // Streak badge
+                        if streak > 0 {
+                            HStack(spacing: 6) {
+                                Image(systemName: "flame.fill")
+                                    .foregroundColor(.orange)
+                                Text("\(streak)-day streak")
+                                    .font(.subheadline.weight(.semibold))
+                                    .foregroundColor(Theme.ink)
+                            }
+                            .padding(.vertical, 8)
+                            .padding(.horizontal, 16)
+                            .background(Theme.card)
+                            .clipShape(Capsule())
+                            .opacity(showCard ? 1 : 0)
+                        }
 
                         WordPairCard(
                             title: "Today's Polarity",
@@ -39,6 +55,7 @@ struct TodayView: View {
                                 )
                             }
                         )
+                        .padding(.top, 12)
                         .opacity(showCard ? 1 : 0)
                         .offset(y: showCard ? 0 : 30)
 
@@ -56,73 +73,94 @@ struct TodayView: View {
                             .opacity(showPrompt ? 1 : 0)
                             .offset(y: showPrompt ? 0 : 24)
 
-                        Spacer(minLength: 24)
+                        // Daily quote
+                        if let quote = pair.quote {
+                            VStack(spacing: 8) {
+                                Text("\"\(quote)\"")
+                                    .font(.system(size: 16, weight: .regular, design: .serif))
+                                    .italic()
+                                    .foregroundColor(Theme.ink.opacity(0.7))
+                                    .multilineTextAlignment(.center)
+                                    .fixedSize(horizontal: false, vertical: true)
+                                if let author = pair.quoteAuthor {
+                                    Text("— \(author)")
+                                        .font(.caption.weight(.medium))
+                                        .foregroundColor(Theme.muted)
+                                }
+                            }
+                            .padding(.horizontal, 32)
+                            .padding(.top, 32)
+                            .opacity(showButton ? 1 : 0)
+                        }
 
+                    }
+                    .padding(.horizontal, 24)
+                    .readableWidth()
+                    .padding(.top, 16)
+                } else if isLoading {
+                    VStack(spacing: 16) {
+                        Spacer(minLength: 120)
+                        ProgressView()
+                            .tint(Theme.accent)
+                            .scaleEffect(1.5)
+                        Text("Loading today's polarity…")
+                            .font(.subheadline)
+                            .foregroundColor(Theme.muted)
+                    }
+                    .frame(maxWidth: .infinity)
+                } else {
+                    VStack(spacing: 16) {
+                        Spacer(minLength: 120)
+                        Image(systemName: "wifi.slash")
+                            .font(.system(size: 40))
+                            .foregroundColor(Theme.muted.opacity(0.4))
+                        Text(errorMessage ?? "Unable to load today's words.")
+                            .font(.subheadline)
+                            .foregroundColor(Theme.muted)
+                            .multilineTextAlignment(.center)
                         Button {
-                            showJournal = true
+                            Task { await load() }
                         } label: {
-                            Label("Journal", systemImage: "square.and.pencil")
-                                .font(.system(size: 17, weight: .semibold, design: .rounded))
-                                .padding(.vertical, 14)
-                                .frame(maxWidth: .infinity)
+                            Label("Try Again", systemImage: "arrow.clockwise")
+                                .font(.system(size: 15, weight: .semibold, design: .rounded))
+                                .padding(.horizontal, 24)
+                                .padding(.vertical, 10)
                                 .background(Theme.accent)
                                 .foregroundColor(.white)
                                 .clipShape(Capsule())
                         }
-                        .padding(.top, 8)
-                        .opacity(showButton ? 1 : 0)
-                        .offset(y: showButton ? 0 : 18)
-
-                        Text("Inspired by the work of David R. Hawkins.")
-                            .font(.caption)
-                            .foregroundColor(Theme.muted.opacity(0.7))
-                            .padding(.top, 12)
-                            .padding(.bottom, 20)
-                            .opacity(showButton ? 1 : 0)
-
-                    } else if isLoading {
-                        Spacer()
-                        VStack(spacing: 16) {
-                            ProgressView()
-                                .tint(Theme.accent)
-                                .scaleEffect(1.5)
-                            Text("Loading today's polarity…")
-                                .font(.subheadline)
-                                .foregroundColor(Theme.muted)
-                        }
-                        .frame(maxWidth: .infinity)
-                        Spacer()
-                    } else {
-                        Spacer()
-                        VStack(spacing: 16) {
-                            Image(systemName: "wifi.slash")
-                                .font(.system(size: 40))
-                                .foregroundColor(Theme.muted.opacity(0.4))
-                            Text(errorMessage ?? "Unable to load today's words.")
-                                .font(.subheadline)
-                                .foregroundColor(Theme.muted)
-                                .multilineTextAlignment(.center)
-                            Button {
-                                Task { await load() }
-                            } label: {
-                                Label("Try Again", systemImage: "arrow.clockwise")
-                                    .font(.system(size: 15, weight: .semibold, design: .rounded))
-                                    .padding(.horizontal, 24)
-                                    .padding(.vertical, 10)
-                                    .background(Theme.accent)
-                                    .foregroundColor(.white)
-                                    .clipShape(Capsule())
-                            }
-                        }
-                        Spacer()
                     }
+                    .frame(maxWidth: .infinity)
                 }
-                .padding(.horizontal, 24)
-                .frame(minHeight: proxy.size.height)
             }
             .scrollIndicators(.hidden)
             .refreshable {
                 await load()
+            }
+
+            // Pinned Journal button at bottom
+            if wordPair != nil {
+                Button {
+                    showJournal = true
+                } label: {
+                    Label("Journal", systemImage: "square.and.pencil")
+                        .font(.system(size: 17, weight: .semibold, design: .rounded))
+                        .padding(.vertical, 14)
+                        .frame(maxWidth: .infinity)
+                        .background(Theme.accent)
+                        .foregroundColor(.white)
+                        .clipShape(Capsule())
+                }
+                .padding(.horizontal, 24)
+                .readableWidth()
+                .opacity(showButton ? 1 : 0)
+                .offset(y: showButton ? 0 : 18)
+
+                Text("Inspired by the work of David R. Hawkins.")
+                    .font(.caption)
+                    .foregroundColor(Theme.muted.opacity(0.5))
+                    .padding(.bottom, 8)
+                    .opacity(showButton ? 1 : 0)
             }
         }
         .task {

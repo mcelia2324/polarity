@@ -34,6 +34,12 @@ final class SettingsStore: ObservableObject {
         }
     }
 
+    @Published var appearance: AppAppearance {
+        didSet {
+            UserDefaults.standard.set(appearance.rawValue, forKey: "appearance")
+        }
+    }
+
     init() {
         // Register explicit defaults so iCloud is off for new installs
         UserDefaults.standard.register(defaults: ["iCloudEnabled": false])
@@ -43,6 +49,7 @@ final class SettingsStore: ObservableObject {
         notifyHour = UserDefaults.standard.object(forKey: "notifyHour") as? Int ?? 8
         notifyMinute = UserDefaults.standard.object(forKey: "notifyMinute") as? Int ?? 0
         iCloudEnabled = UserDefaults.standard.bool(forKey: "iCloudEnabled")
+        appearance = AppAppearance(rawValue: UserDefaults.standard.string(forKey: "appearance") ?? "") ?? .system
         Task { await APIClient.shared.updateBaseURL(baseURL) }
     }
 }

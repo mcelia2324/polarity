@@ -1,6 +1,7 @@
 import SwiftUI
 
 struct HistoryView: View {
+    @ObservedObject var journalStore: JournalStore
     @State private var history: [WordPair] = []
     @State private var isLoading = true
     @State private var errorMessage: String?
@@ -21,6 +22,7 @@ struct HistoryView: View {
                         Spacer()
                     }
                     .frame(maxWidth: .infinity)
+                    .readableWidth()
                 } else if let errorMessage, history.isEmpty {
                     VStack(spacing: 16) {
                         Spacer(minLength: 80)
@@ -45,6 +47,7 @@ struct HistoryView: View {
                         Spacer()
                     }
                     .frame(maxWidth: .infinity)
+                    .readableWidth()
                     .padding(.horizontal, 32)
                 } else if history.isEmpty {
                     VStack(spacing: 16) {
@@ -62,16 +65,25 @@ struct HistoryView: View {
                         Spacer()
                     }
                     .frame(maxWidth: .infinity)
+                    .readableWidth()
                     .padding(.horizontal, 32)
                 } else {
                     LazyVStack(spacing: 12) {
                         ForEach(history) { pair in
-                            HistoryCard(pair: pair, onTapWord: { word, definition in
-                                selectedDefinition = HistoryDefinitionItem(word: word, definition: definition)
-                            })
+                            NavigationLink(destination: HistoryDetailView(pair: pair, journalStore: journalStore)) {
+                                HistoryCard(
+                                    pair: pair,
+                                    hasJournalEntry: journalStore.entry(forDateString: pair.date) != nil,
+                                    onTapWord: { word, definition in
+                                        selectedDefinition = HistoryDefinitionItem(word: word, definition: definition)
+                                    }
+                                )
+                            }
+                            .buttonStyle(.plain)
                         }
                     }
                     .padding(.horizontal, 20)
+                    .readableWidth()
                     .padding(.top, 8)
                     .padding(.bottom, 24)
                 }
@@ -132,6 +144,7 @@ private struct HistoryDefinitionItem: Identifiable {
 
 private struct HistoryCard: View {
     let pair: WordPair
+    let hasJournalEntry: Bool
     let onTapWord: (String, String) -> Void
 
     private var formattedDate: String {
@@ -146,9 +159,20 @@ private struct HistoryCard: View {
 
     var body: some View {
         VStack(alignment: .leading, spacing: 10) {
-            Text(formattedDate)
-                .font(.caption.weight(.medium))
-                .foregroundColor(Theme.muted)
+            HStack {
+                Text(formattedDate)
+                    .font(.caption.weight(.medium))
+                    .foregroundColor(Theme.muted)
+                Spacer()
+                if hasJournalEntry {
+                    Image(systemName: "book.closed.fill")
+                        .font(.caption2)
+                        .foregroundColor(Theme.accent.opacity(0.6))
+                }
+                Image(systemName: "chevron.right")
+                    .font(.caption2.weight(.semibold))
+                    .foregroundColor(Theme.muted.opacity(0.4))
+            }
 
             HStack(spacing: 10) {
                 wordLabel(pair.wordA, definition: pair.wordADefinition)

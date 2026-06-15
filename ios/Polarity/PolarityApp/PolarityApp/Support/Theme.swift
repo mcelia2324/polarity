@@ -9,6 +9,7 @@ enum Theme {
     static let accentDark = Color("accentDark", bundle: nil)
     static let ink = Color("ink", bundle: nil)
     static let muted = Color("muted", bundle: nil)
+    static let cardShadow = Color("cardShadow", bundle: nil)
 
     // Fallbacks for when color assets aren't available
     static let backgroundLight = Color(red: 0.96, green: 0.94, blue: 0.91)
@@ -27,12 +28,48 @@ struct CardModifier: ViewModifier {
             .padding(16)
             .background(Theme.card)
             .cornerRadius(20)
-            .shadow(color: Color.black.opacity(0.08), radius: 16, x: 0, y: 6)
+            .shadow(color: Theme.cardShadow, radius: 16, x: 0, y: 6)
+    }
+}
+
+struct ReadableWidthModifier: ViewModifier {
+    func body(content: Content) -> some View {
+        content
+            .frame(maxWidth: 600)
+            .frame(maxWidth: .infinity)
     }
 }
 
 extension View {
     func cardStyle() -> some View {
         modifier(CardModifier())
+    }
+
+    func readableWidth() -> some View {
+        modifier(ReadableWidthModifier())
+    }
+}
+
+enum AppAppearance: String, CaseIterable, Identifiable {
+    case system
+    case light
+    case dark
+
+    var id: String { rawValue }
+
+    var label: String {
+        switch self {
+        case .system: return "System"
+        case .light: return "Light"
+        case .dark: return "Dark"
+        }
+    }
+
+    var colorScheme: ColorScheme? {
+        switch self {
+        case .system: return nil
+        case .light: return .light
+        case .dark: return .dark
+        }
     }
 }

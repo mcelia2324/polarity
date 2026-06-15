@@ -41,6 +41,7 @@ struct JournalView: View {
                         }
                     }
                     .padding(.horizontal, 20)
+                    .readableWidth()
                     .padding(.top, 8)
                     .padding(.bottom, 24)
                 }
@@ -82,6 +83,7 @@ struct JournalView: View {
             Spacer()
         }
         .frame(maxWidth: .infinity)
+        .readableWidth()
         .padding(.horizontal, 32)
     }
 }
