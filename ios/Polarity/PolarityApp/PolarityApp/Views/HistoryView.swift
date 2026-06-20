@@ -171,11 +171,6 @@ private struct HistoryCard: View {
                 wordLabel(pair.wordB, definition: pair.wordBDefinition)
             }
 
-            if pair.wordADefinition != nil || pair.wordBDefinition != nil {
-                Text("Tap a word for its definition.")
-                    .font(.caption2)
-                    .foregroundColor(Theme.muted.opacity(0.6))
-            }
         }
         .frame(maxWidth: .infinity, alignment: .leading)
         .cardStyle()

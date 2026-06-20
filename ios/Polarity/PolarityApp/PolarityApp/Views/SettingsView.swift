@@ -23,51 +23,106 @@ struct SettingsView: View {
 
     var body: some View {
         NavigationView {
-            Form {
-                Section(header: Text("Notifications")) {
-                    Toggle("Daily Reminder", isOn: $settings.notificationsEnabled)
-                        .onChange(of: settings.notificationsEnabled) { _ in
-                            Task {
-                                if settings.notificationsEnabled {
-                                    await notificationManager.requestAuthorization()
+            ScrollView {
+                VStack(alignment: .leading, spacing: 24) {
+                    SettingsSection(title: "Notifications", icon: "bell") {
+                        Toggle("Daily Reminder", isOn: $settings.notificationsEnabled)
+                            .tint(Theme.accent)
+                            .onChange(of: settings.notificationsEnabled) { _ in
+                                Task {
+                                    if settings.notificationsEnabled {
+                                        await notificationManager.requestAuthorization()
+                                    }
+                                    notificationManager.updateServerToggle(settings: settings)
                                 }
-                                notificationManager.updateServerToggle(settings: settings)
+                            }
+
+                        if settings.notificationsEnabled {
+                            hairline
+                            DatePicker("Remind me at", selection: notifyTimeBinding, displayedComponents: .hourAndMinute)
+                                .tint(Theme.accent)
+                        }
+                    }
+
+                    SettingsSection(title: "Storage", icon: "icloud") {
+                        Toggle("Sync with iCloud", isOn: $settings.iCloudEnabled)
+                            .tint(Theme.accent)
+                            .onChange(of: settings.iCloudEnabled) { _ in
+                                journalStore.refreshStorageLocation()
+                            }
+
+                        hairline
+
+                        Text("Your journal stays on-device by default. Enabling iCloud sync stores it in your private iCloud Drive.")
+                            .font(.caption)
+                            .foregroundColor(Theme.muted)
+                            .fixedSize(horizontal: false, vertical: true)
+                            .frame(maxWidth: .infinity, alignment: .leading)
+                    }
+
+                    SettingsSection(title: "Appearance", icon: "paintbrush") {
+                        Picker("Theme", selection: $settings.appearance) {
+                            ForEach(AppAppearance.allCases) { option in
+                                Text(option.label).tag(option)
                             }
                         }
-
-                    if settings.notificationsEnabled {
-                        DatePicker("Remind me at", selection: notifyTimeBinding, displayedComponents: .hourAndMinute)
+                        .pickerStyle(.segmented)
                     }
-                }
 
-                Section(header: Text("Storage")) {
-                    Toggle("Sync with iCloud", isOn: $settings.iCloudEnabled)
-                        .onChange(of: settings.iCloudEnabled) { _ in
-                            journalStore.refreshStorageLocation()
-                        }
-                    Text("Your journal stays on-device by default. Enabling iCloud sync stores it in your private iCloud Drive.")
-                        .font(.caption)
-                        .foregroundColor(Theme.muted)
-                }
-
-                Section(header: Text("Appearance")) {
-                    Picker("Theme", selection: $settings.appearance) {
-                        ForEach(AppAppearance.allCases) { option in
-                            Text(option.label).tag(option)
-                        }
+                    VStack(spacing: 5) {
+                        Text("Polarity")
+                            .font(.footnote.weight(.semibold))
+                            .foregroundColor(Theme.muted)
+                        Text("Free and private. No account, no ads, no tracking.")
+                            .font(.caption2)
+                            .foregroundColor(Theme.muted.opacity(0.7))
+                            .multilineTextAlignment(.center)
                     }
-                    .pickerStyle(.segmented)
+                    .frame(maxWidth: .infinity)
+                    .padding(.top, 8)
                 }
+                .padding(.horizontal, 20)
+                .readableWidth()
+                .padding(.top, 8)
+                .padding(.bottom, 24)
             }
-            .readableWidth()
+            .scrollIndicators(.hidden)
             .scrollContentBackground(.hidden)
             .background(Color.clear)
             .navigationTitle("Settings")
-            .scrollDismissesKeyboard(.interactively)
-            .onTapGesture { UIApplication.shared.sendAction(#selector(UIResponder.resignFirstResponder), to: nil, from: nil, for: nil) }
             .onAppear {
                 notificationManager.refreshAuthorizationStatus()
             }
+        }
+    }
+
+    private var hairline: some View {
+        Rectangle()
+            .fill(Theme.muted.opacity(0.15))
+            .frame(height: 1)
+    }
+}
+
+/// A titled, card-backed group of controls, matching the app's warm card language.
+private struct SettingsSection<Content: View>: View {
+    let title: String
+    let icon: String
+    @ViewBuilder var content: Content
+
+    var body: some View {
+        VStack(alignment: .leading, spacing: 10) {
+            Label(title.uppercased(), systemImage: icon)
+                .font(.caption.weight(.semibold))
+                .tracking(1.2)
+                .foregroundColor(Theme.accentDark)
+                .padding(.leading, 4)
+
+            VStack(alignment: .leading, spacing: 14) {
+                content
+            }
+            .foregroundColor(Theme.ink)
+            .frame(maxWidth: .infinity, alignment: .leading)
+            .cardStyle()
         }
     }
 }
