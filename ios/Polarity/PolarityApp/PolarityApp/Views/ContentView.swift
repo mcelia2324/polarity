@@ -10,6 +10,15 @@ struct ContentView: View {
             Theme.appBackground
                 .ignoresSafeArea()
 
+            RadialGradient(
+                colors: [Theme.accent.opacity(0.06), .clear],
+                center: UnitPoint(x: 0.5, y: 0.04),
+                startRadius: 0,
+                endRadius: 340
+            )
+            .ignoresSafeArea()
+            .allowsHitTesting(false)
+
             TabView {
                 TodayView(journalStore: journalStore)
                     .tabItem {

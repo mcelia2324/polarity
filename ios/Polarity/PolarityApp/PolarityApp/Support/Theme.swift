@@ -25,10 +25,9 @@ enum Theme {
 struct CardModifier: ViewModifier {
     func body(content: Content) -> some View {
         content
-            .padding(16)
-            .background(Theme.card)
-            .cornerRadius(20)
-            .shadow(color: Theme.cardShadow, radius: 16, x: 0, y: 6)
+            .padding(18)
+            .background(Theme.card, in: RoundedRectangle(cornerRadius: 22, style: .continuous))
+            .shadow(color: Theme.cardShadow, radius: 18, x: 0, y: 8)
     }
 }
 

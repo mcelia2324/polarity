@@ -269,28 +269,37 @@ private struct ContemplationCard: View {
 
     var body: some View {
         VStack(alignment: .leading, spacing: 14) {
-            HStack(spacing: 8) {
-                Image(systemName: "leaf")
-                    .font(.footnote)
-                Text("Today's Contemplation")
-                    .font(.footnote.weight(.semibold))
-                    .tracking(0.5)
+            HStack(spacing: 7) {
+                Image(systemName: "leaf.fill")
+                    .font(.caption2)
+                Text("TODAY'S CONTEMPLATION")
+                    .font(.caption2.weight(.semibold))
+                    .tracking(1.6)
             }
             .foregroundColor(Theme.accentDark)
 
-            Rectangle()
-                .fill(Theme.accent.opacity(0.25))
-                .frame(width: 28, height: 2)
-
             Text(text)
                 .font(.system(size: 17, weight: .regular, design: .serif))
-                .foregroundColor(Theme.ink.opacity(0.85))
-                .lineSpacing(6)
+                .foregroundColor(Theme.ink.opacity(0.9))
+                .lineSpacing(7)
                 .fixedSize(horizontal: false, vertical: true)
                 .frame(maxWidth: .infinity, alignment: .leading)
         }
+        .padding(22)
         .frame(maxWidth: .infinity, alignment: .leading)
-        .cardStyle()
+        .background(
+            LinearGradient(
+                colors: [Theme.card, Theme.accent.opacity(0.06)],
+                startPoint: .top,
+                endPoint: .bottom
+            ),
+            in: RoundedRectangle(cornerRadius: 22, style: .continuous)
+        )
+        .overlay(
+            RoundedRectangle(cornerRadius: 22, style: .continuous)
+                .strokeBorder(Theme.accent.opacity(0.12), lineWidth: 1)
+        )
+        .shadow(color: Theme.cardShadow, radius: 18, x: 0, y: 8)
     }
 }
 
