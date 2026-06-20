@@ -98,7 +98,7 @@ struct TodayView: View {
                                     .lineSpacing(4)
                                     .fixedSize(horizontal: false, vertical: true)
                                 if let author = pair.quoteAuthor {
-                                    Text("— \(author)")
+                                    Text(author)
                                         .font(.caption.weight(.medium))
                                         .foregroundColor(Theme.muted)
                                         .tracking(0.5)

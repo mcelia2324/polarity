@@ -2,7 +2,7 @@ import Foundation
 import SwiftUI
 
 /// Computes "Consciousness Mirror" stats entirely from on-device JournalStore data.
-/// No backend, no AI — all inputs come from `[JournalEntry]`.
+/// No backend, no AI. All inputs come from `[JournalEntry]`.
 @MainActor
 struct MirrorStats {
 

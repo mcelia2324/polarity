@@ -3,7 +3,7 @@ import Combine
 import AVFoundation
 import Speech
 
-/// Live, on-device speech-to-text for the journal editor (free and private — no server).
+/// Live, on-device speech-to-text for the journal editor (free and private, no server).
 /// Matches Polarity's @MainActor ObservableObject service convention.
 @MainActor
 final class SpeechTranscriber: ObservableObject {

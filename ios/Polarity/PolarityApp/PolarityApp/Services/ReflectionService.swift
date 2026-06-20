@@ -8,8 +8,8 @@ import FoundationModels
 ///
 /// Runs ENTIRELY on-device via Apple's Foundation Models framework (iOS 26+, Apple-
 /// Intelligence-capable devices). Journal text never leaves the phone, and there is zero
-/// server cost. On iOS 18–25, ineligible hardware, or when Apple Intelligence is off, it
-/// returns a thoughtful templated reflection instead — so every user always gets something.
+/// server cost. On iOS 18 to 25, ineligible hardware, or when Apple Intelligence is off, it
+/// returns a thoughtful templated reflection instead, so every user always gets something.
 actor ReflectionService {
     static let shared = ReflectionService()
 
@@ -39,7 +39,7 @@ actor ReflectionService {
         return false
     }
 
-    /// Produce a reflection. Never throws — always returns something to show the user.
+    /// Produce a reflection. Never throws, and always returns something to show the user.
     func reflect(wordA: String, wordB: String, note: String) async -> Reflection {
         let trimmed = note.trimmingCharacters(in: .whitespacesAndNewlines)
         guard !trimmed.isEmpty else {
@@ -75,11 +75,12 @@ actor ReflectionService {
         You are a warm, grounded reflection companion inside a daily journaling app about \
         contrasting word pairs (inspired by David R. Hawkins' Map of Consciousness). \
         The user has just journaled about the polarity between two words. \
-        Mirror back what THEY wrote — be specific to their words, do not invent facts they \
+        Mirror back what THEY wrote, being specific to their words. Do not invent facts they \
         did not say, and do not give advice or diagnose. Be encouraging and concise. \
         Write 2 to 4 sentences total, then end with exactly ONE gentle, open-ended question \
         that helps them go a little deeper. Do not use lists, headings, or emoji. \
-        Refer to the two words naturally. Keep a calm, kind tone.
+        Refer to the two words naturally, with a calm, kind tone. Use simple punctuation, and \
+        never use em dashes, en dashes, or double hyphens.
         """
 
         let prompt = """
@@ -92,14 +93,14 @@ actor ReflectionService {
             let session = LanguageModelSession(instructions: instructions)
             let options = GenerationOptions(temperature: 0.7)
             let response = try await session.respond(to: prompt, options: options)
-            let text = response.content.trimmingCharacters(in: .whitespacesAndNewlines)
+            let text = normalizeDashes(response.content).trimmingCharacters(in: .whitespacesAndNewlines)
             guard !text.isEmpty else {
                 return template(wordA: wordA, wordB: wordB, note: note, source: .templatedError)
             }
             return Reflection(text: text, source: .onDevice)
         } catch {
             // Covers guardrail violations, context-window overflow, model unload, etc.
-            // We never surface a raw error to the user — we degrade gracefully.
+            // We never surface a raw error to the user; we degrade gracefully.
             return template(wordA: wordA, wordB: wordB, note: note, source: .templatedError)
         }
     }
@@ -144,6 +145,15 @@ actor ReflectionService {
         if aCount > bCount { return "toward \(wordA.capitalized)" }
         if bCount > aCount { return "toward \(wordB.capitalized)" }
         return "between the two"
+    }
+
+    /// Replace em/en dashes and double hyphens with plain punctuation (avoids the machine-written look).
+    private func normalizeDashes(_ text: String) -> String {
+        var t = text
+        for sep in [" — ", " – ", " -- ", "—", "--"] {
+            t = t.replacingOccurrences(of: sep, with: ", ")
+        }
+        return t.replacingOccurrences(of: " ,", with: ",")
     }
 
     private func occurrences(of needle: String, in haystack: String) -> Int {

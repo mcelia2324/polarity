@@ -2,7 +2,7 @@ import SwiftUI
 
 /// First-run onboarding that delivers the "wow" in under a minute: it explains the practice,
 /// then hands the user TODAY's real polarity and lets them write one sentence and feel the
-/// on-device reflection talk back — before they've journaled a single day.
+/// on-device reflection talk back, before they've journaled a single day.
 struct OnboardingView: View {
     @ObservedObject var settings: SettingsStore
     @ObservedObject var journalStore: JournalStore
@@ -65,7 +65,7 @@ struct OnboardingView: View {
             Text("Polarity")
                 .font(.system(size: 40, weight: .semibold, design: .serif))
                 .foregroundColor(Theme.ink)
-            Text("Two contrasting words each day —\na moment to notice where you are,\nand choose where to rise.")
+            Text("Two contrasting words each day.\nA moment to notice where you are,\nand choose where to rise.")
                 .font(.system(size: 17, weight: .regular, design: .serif))
                 .foregroundColor(Theme.muted)
                 .multilineTextAlignment(.center)
@@ -96,7 +96,7 @@ struct OnboardingView: View {
             VStack(spacing: 20) {
                 PracticeRow(icon: "circle.lefthalf.filled",
                             title: "Notice the polarity",
-                            subtitle: "Each day brings two contrasting words — a higher and a lower expression of consciousness.")
+                            subtitle: "Each day brings two contrasting words, a higher and a lower expression of consciousness.")
                 PracticeRow(icon: "sparkles",
                             title: "Reflect",
                             subtitle: "Sit with where each one shows up in your day, without judgment.")
@@ -290,7 +290,7 @@ private struct OnboardingTasteView: View {
                             .font(.subheadline).foregroundColor(Theme.muted)
                     }
                 } else {
-                    Text("Couldn't load today's words right now — you can still continue and start fresh inside.")
+                    Text("Couldn't load today's words right now, but you can still continue and start fresh inside.")
                         .font(.subheadline)
                         .foregroundColor(Theme.muted)
                         .multilineTextAlignment(.center)
@@ -339,7 +339,7 @@ private struct OnboardingTasteView: View {
     }
 
     private func continueTapped() {
-        // If they wrote a real sentence, keep it as their first journal entry — an instant start.
+        // If they wrote a real sentence, keep it as their first journal entry for an instant start.
         if let pair, !trimmedNote.isEmpty {
             journalStore.addOrUpdate(date: Date(), wordA: pair.wordA, wordB: pair.wordB, note: trimmedNote)
         }

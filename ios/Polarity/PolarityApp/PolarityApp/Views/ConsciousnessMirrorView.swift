@@ -1,7 +1,7 @@
 import SwiftUI
-import Charts   // iOS 16+ — fine for deployment target 18
+import Charts   // iOS 16+, fine for deployment target 18
 
-/// "Consciousness Mirror" — reflects the user's reflection journey back to them, built
+/// "Consciousness Mirror" reflects the user's reflection journey back to them, built
 /// entirely from on-device journal data. No backend, no per-user AI, nothing leaves the phone.
 struct ConsciousnessMirrorView: View {
     @ObservedObject var journalStore: JournalStore
