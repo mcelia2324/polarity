@@ -61,18 +61,9 @@ struct TodayView: View {
                         .opacity(showCard ? 1 : 0)
                         .offset(y: showCard ? 0 : 30)
 
-                        Text("Reflect on the meanings, differences, and which calibrates higher.")
-                            .font(.subheadline)
-                            .foregroundColor(Theme.muted)
-                            .multilineTextAlignment(.center)
-                            .padding(.horizontal, 32)
-                            .padding(.top, 20)
-                            .opacity(showCard ? 1 : 0)
-                            .offset(y: showCard ? 0 : 20)
-
                         if let contemplation = pair.contemplation, !contemplation.isEmpty {
                             ContemplationCard(text: contemplation)
-                                .padding(.top, 20)
+                                .padding(.top, 24)
                                 .opacity(showPrompt ? 1 : 0)
                                 .offset(y: showPrompt ? 0 : 24)
                         }
@@ -114,7 +105,7 @@ struct TodayView: View {
                     }
                     .padding(.horizontal, 24)
                     .readableWidth()
-                    .padding(.top, 40)
+                    .padding(.top, 28)
                     .padding(.bottom, 16)
                 } else if isLoading {
                     VStack(spacing: 16) {
