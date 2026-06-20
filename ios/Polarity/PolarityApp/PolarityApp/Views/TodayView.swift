@@ -196,7 +196,7 @@ struct TodayView: View {
             }
         }
         .sheet(item: $selectedDefinition) { item in
-            DefinitionSheetView(item: item)
+            DefinitionSheet(word: item.word, definition: item.definition)
         }
     }
 
@@ -303,26 +303,4 @@ private struct DefinitionSheetItem: Identifiable {
     let id = UUID()
     let word: String
     let definition: String
-}
-
-private struct DefinitionSheetView: View {
-    let item: DefinitionSheetItem
-
-    var body: some View {
-        VStack(alignment: .leading, spacing: 18) {
-            Text(item.word.capitalized)
-                .font(.system(size: 30, weight: .semibold, design: .serif))
-                .foregroundColor(Theme.accentDark)
-            Text(item.definition)
-                .font(.system(size: 20, weight: .regular, design: .rounded))
-                .foregroundColor(Theme.ink)
-                .fixedSize(horizontal: false, vertical: true)
-            Spacer(minLength: 0)
-        }
-        .frame(maxWidth: .infinity, alignment: .leading)
-        .padding(24)
-        .background(Theme.card)
-        .presentationDetents([.fraction(0.34), .medium])
-        .presentationDragIndicator(.visible)
-    }
 }

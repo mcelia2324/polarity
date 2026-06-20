@@ -315,22 +315,7 @@ private struct OnboardingTasteView: View {
         .scrollIndicators(.hidden)
         .task { await load() }
         .sheet(item: $selectedDefinition) { item in
-            VStack(alignment: .leading, spacing: 18) {
-                Text(item.word.capitalized)
-                    .font(.system(size: 30, weight: .semibold, design: .serif))
-                    .foregroundColor(Theme.accentDark)
-                Text(item.definition)
-                    .font(.system(size: 20, weight: .regular, design: .rounded))
-                    .foregroundColor(Theme.ink)
-                    .lineSpacing(4)
-                    .fixedSize(horizontal: false, vertical: true)
-                Spacer(minLength: 0)
-            }
-            .frame(maxWidth: .infinity, alignment: .leading)
-            .padding(24)
-            .background(Theme.card)
-            .presentationDetents([.fraction(0.34), .medium])
-            .presentationDragIndicator(.visible)
+            DefinitionSheet(word: item.word, definition: item.definition)
         }
     }
 
