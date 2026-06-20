@@ -17,30 +17,13 @@ struct TodayView: View {
     private var streak: Int { journalStore.currentStreak }
 
     var body: some View {
+        NavigationView {
         VStack(spacing: 0) {
             ScrollView {
                 if let pair = wordPair {
                     VStack(spacing: 0) {
-                        // Streak badge
-                        if streak > 0 {
-                            HStack(spacing: 6) {
-                                Image(systemName: "flame.fill")
-                                    .foregroundColor(Theme.accent)
-                                Text("\(streak)-day streak")
-                                    .font(.subheadline.weight(.semibold))
-                                    .foregroundColor(Theme.ink)
-                            }
-                            .padding(.vertical, 8)
-                            .padding(.horizontal, 16)
-                            .background(Theme.card)
-                            .clipShape(Capsule())
-                            .scaleEffect(showCard ? 1 : 0.9)
-                            .opacity(showCard ? 1 : 0)
-                            .offset(y: showCard ? 0 : 12)
-                        }
-
                         WordPairCard(
-                            title: "Today's Polarity",
+                            title: "",
                             subtitle: formattedDate(pair.date),
                             wordA: pair.wordA,
                             wordB: pair.wordB,
@@ -105,7 +88,7 @@ struct TodayView: View {
                     }
                     .padding(.horizontal, 24)
                     .readableWidth()
-                    .padding(.top, 28)
+                    .padding(.top, 8)
                     .padding(.bottom, 16)
                 } else if isLoading {
                     VStack(spacing: 16) {
@@ -144,6 +127,8 @@ struct TodayView: View {
                 }
             }
             .scrollIndicators(.hidden)
+            .scrollContentBackground(.hidden)
+            .background(Color.clear)
             .refreshable {
                 await load()
             }
@@ -173,6 +158,23 @@ struct TodayView: View {
                     .padding(.bottom, 8)
                     .opacity(showButton ? 1 : 0)
             }
+        }
+        .navigationTitle("Today")
+        .navigationBarTitleDisplayMode(.large)
+        .toolbar {
+            if streak > 0 {
+                ToolbarItem(placement: .topBarTrailing) {
+                    HStack(spacing: 4) {
+                        Image(systemName: "flame.fill")
+                            .font(.footnote)
+                        Text("\(streak)")
+                            .font(.subheadline.weight(.semibold))
+                    }
+                    .foregroundColor(Theme.accent)
+                    .accessibilityLabel("\(streak) day streak")
+                }
+            }
+        }
         }
         .task {
             await load()

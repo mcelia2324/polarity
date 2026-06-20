@@ -33,9 +33,11 @@ struct WordPairCard: View {
                 .foregroundColor(Theme.muted)
                 .tracking(1.4)
 
-            Text(title)
-                .font(.title2.weight(.semibold))
-                .foregroundColor(Theme.ink)
+            if !title.isEmpty {
+                Text(title)
+                    .font(.title2.weight(.semibold))
+                    .foregroundColor(Theme.ink)
+            }
 
             HStack(spacing: 14) {
                 wordButton(label: wordA.capitalized, action: onTapWordA)
