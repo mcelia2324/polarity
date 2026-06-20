@@ -115,6 +115,7 @@ struct TodayView: View {
                     .padding(.horizontal, 24)
                     .readableWidth()
                     .padding(.top, 16)
+                    .padding(.bottom, 16)
                 } else if isLoading {
                     VStack(spacing: 16) {
                         Spacer(minLength: 120)
@@ -171,6 +172,7 @@ struct TodayView: View {
                 }
                 .padding(.horizontal, 24)
                 .readableWidth()
+                .padding(.top, 18)
                 .opacity(showButton ? 1 : 0)
                 .offset(y: showButton ? 0 : 18)
 
