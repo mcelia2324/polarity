@@ -39,6 +39,23 @@ struct ReadableWidthModifier: ViewModifier {
     }
 }
 
+/// A soft fade-and-rise entrance. Pass a delay to stagger several elements.
+struct GentleAppear: ViewModifier {
+    var delay: Double = 0
+    @State private var shown = false
+
+    func body(content: Content) -> some View {
+        content
+            .opacity(shown ? 1 : 0)
+            .offset(y: shown ? 0 : 16)
+            .onAppear {
+                withAnimation(.easeOut(duration: 0.55).delay(delay)) {
+                    shown = true
+                }
+            }
+    }
+}
+
 extension View {
     func cardStyle() -> some View {
         modifier(CardModifier())
@@ -46,6 +63,10 @@ extension View {
 
     func readableWidth() -> some View {
         modifier(ReadableWidthModifier())
+    }
+
+    func gentleAppear(_ delay: Double = 0) -> some View {
+        modifier(GentleAppear(delay: delay))
     }
 }
 

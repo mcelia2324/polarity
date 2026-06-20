@@ -18,10 +18,11 @@ struct ConsciousnessMirrorView: View {
                         emptyState
                     } else {
                         VStack(spacing: 16) {
-                            headlineCard(stats)
-                            heatmapCard(stats)
-                            higherWordsCard(stats)
-                            footnote
+                            headlineCard(stats).gentleAppear(0)
+                            thisWeekCard(stats).gentleAppear(0.06)
+                            heatmapCard(stats).gentleAppear(0.12)
+                            higherWordsCard(stats).gentleAppear(0.18)
+                            footnote.gentleAppear(0.24)
                         }
                         .padding(.horizontal, 20)
                         .readableWidth()
@@ -77,6 +78,52 @@ struct ConsciousnessMirrorView: View {
         .padding(12)
         .background(Theme.background.opacity(0.5))
         .cornerRadius(14)
+    }
+
+    // MARK: - This week
+
+    private func thisWeekCard(_ s: MirrorStats) -> some View {
+        let week = Array(s.heatmap.suffix(7))
+        return VStack(alignment: .leading, spacing: 14) {
+            HStack {
+                Label("This Week", systemImage: "calendar")
+                    .font(.footnote.weight(.semibold))
+                    .foregroundColor(Theme.accentDark)
+                Spacer()
+                Text("\(s.reflectionsThisWeek) of 7 days")
+                    .font(.caption.weight(.medium))
+                    .foregroundColor(Theme.muted)
+            }
+
+            HStack(spacing: 8) {
+                ForEach(week) { day in
+                    VStack(spacing: 6) {
+                        RoundedRectangle(cornerRadius: 9, style: .continuous)
+                            .fill(day.hasEntry ? AnyShapeStyle(Theme.accent.gradient) : AnyShapeStyle(Theme.muted.opacity(0.12)))
+                            .frame(height: 40)
+                            .overlay {
+                                if day.hasEntry {
+                                    Image(systemName: "checkmark")
+                                        .font(.caption2.weight(.bold))
+                                        .foregroundColor(.white)
+                                }
+                            }
+                        Text(weekdayLetter(day.date))
+                            .font(.caption2)
+                            .foregroundColor(Theme.muted)
+                    }
+                    .frame(maxWidth: .infinity)
+                }
+            }
+        }
+        .frame(maxWidth: .infinity, alignment: .leading)
+        .cardStyle()
+    }
+
+    private func weekdayLetter(_ date: Date) -> String {
+        let symbols = Calendar.current.veryShortWeekdaySymbols
+        let idx = Calendar.current.component(.weekday, from: date) - 1
+        return symbols.indices.contains(idx) ? symbols[idx] : ""
     }
 
     // MARK: - GitHub-style heatmap (plain SwiftUI)
@@ -176,6 +223,12 @@ struct ConsciousnessMirrorView: View {
                 }
             }
             .frame(height: max(CGFloat(s.topHigherWords.count) * 32, 60))
+
+            if let top = s.topHigherWords.first {
+                Text("You've leaned toward \(top.word) most often.")
+                    .font(.caption)
+                    .foregroundColor(Theme.muted)
+            }
         }
         .frame(maxWidth: .infinity, alignment: .leading)
         .cardStyle()

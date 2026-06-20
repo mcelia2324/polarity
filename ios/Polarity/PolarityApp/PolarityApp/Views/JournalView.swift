@@ -44,6 +44,7 @@ struct JournalView: View {
                     .readableWidth()
                     .padding(.top, 8)
                     .padding(.bottom, 24)
+                    .gentleAppear()
                 }
             }
             .scrollIndicators(.hidden)

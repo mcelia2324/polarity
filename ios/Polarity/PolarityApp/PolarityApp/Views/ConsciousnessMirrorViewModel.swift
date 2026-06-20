@@ -12,6 +12,7 @@ struct MirrorStats {
     let longestStreak: Int
     let wordsThisMonth: Int
     let reflectionsThisMonth: Int
+    let reflectionsThisWeek: Int
 
     // Heatmap
     let heatmap: [HeatmapDay]
@@ -54,12 +55,14 @@ struct MirrorStats {
         }
 
         let today = calendar.startOfDay(for: now)
+        let weekStart = calendar.date(byAdding: .day, value: -6, to: today) ?? today
+        let reflectionsThisWeek = hasEntryByDay.filter { $0 >= weekStart && $0 <= today }.count
         let totalDays = heatmapWeeks * 7
         guard let windowStart = calendar.date(byAdding: .day, value: -(totalDays - 1), to: today) else {
             return MirrorStats(totalReflections: totalReflections, currentStreak: current,
                                longestStreak: longest, wordsThisMonth: wordsThisMonth,
-                               reflectionsThisMonth: reflectionsThisMonth, heatmap: [],
-                               maxIntensity: 0, topHigherWords: [])
+                               reflectionsThisMonth: reflectionsThisMonth, reflectionsThisWeek: reflectionsThisWeek,
+                               heatmap: [], maxIntensity: 0, topHigherWords: [])
         }
 
         var heatmap: [HeatmapDay] = []
@@ -96,6 +99,7 @@ struct MirrorStats {
             longestStreak: longest,
             wordsThisMonth: wordsThisMonth,
             reflectionsThisMonth: reflectionsThisMonth,
+            reflectionsThisWeek: reflectionsThisWeek,
             heatmap: heatmap,
             maxIntensity: maxIntensity,
             topHigherWords: Array(topHigherWords)
