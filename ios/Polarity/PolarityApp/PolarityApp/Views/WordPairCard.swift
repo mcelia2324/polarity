@@ -69,7 +69,10 @@ struct WordPairCard: View {
     @ViewBuilder
     private func wordButton(label: String, action: (() -> Void)?) -> some View {
         if let action {
-            Button(action: action) {
+            Button {
+                UISelectionFeedbackGenerator().selectionChanged()
+                action()
+            } label: {
                 Text(label)
                     .font(.system(size: 30, weight: .semibold, design: .serif))
                     .foregroundColor(Theme.ink)

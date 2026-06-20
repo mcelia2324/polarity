@@ -25,7 +25,7 @@ struct TodayView: View {
                         if streak > 0 {
                             HStack(spacing: 6) {
                                 Image(systemName: "flame.fill")
-                                    .foregroundColor(.orange)
+                                    .foregroundColor(Theme.accent)
                                 Text("\(streak)-day streak")
                                     .font(.subheadline.weight(.semibold))
                                     .foregroundColor(Theme.ink)
@@ -34,7 +34,9 @@ struct TodayView: View {
                             .padding(.horizontal, 16)
                             .background(Theme.card)
                             .clipShape(Capsule())
+                            .scaleEffect(showCard ? 1 : 0.9)
                             .opacity(showCard ? 1 : 0)
+                            .offset(y: showCard ? 0 : 12)
                         }
 
                         WordPairCard(
@@ -68,6 +70,13 @@ struct TodayView: View {
                             .opacity(showCard ? 1 : 0)
                             .offset(y: showCard ? 0 : 20)
 
+                        if let contemplation = pair.contemplation, !contemplation.isEmpty {
+                            ContemplationCard(text: contemplation)
+                                .padding(.top, 20)
+                                .opacity(showPrompt ? 1 : 0)
+                                .offset(y: showPrompt ? 0 : 24)
+                        }
+
                         DailyPromptCard(wordA: pair.wordA, wordB: pair.wordB)
                             .padding(.top, 20)
                             .opacity(showPrompt ? 1 : 0)
@@ -75,22 +84,31 @@ struct TodayView: View {
 
                         // Daily quote
                         if let quote = pair.quote {
-                            VStack(spacing: 8) {
-                                Text("\"\(quote)\"")
-                                    .font(.system(size: 16, weight: .regular, design: .serif))
+                            VStack(spacing: 12) {
+                                Rectangle()
+                                    .fill(Theme.muted.opacity(0.2))
+                                    .frame(width: 40, height: 1)
+                                    .padding(.bottom, 4)
+
+                                Text("\u{201C}\(quote)\u{201D}")
+                                    .font(.system(size: 18, weight: .regular, design: .serif))
                                     .italic()
                                     .foregroundColor(Theme.ink.opacity(0.7))
                                     .multilineTextAlignment(.center)
+                                    .lineSpacing(4)
                                     .fixedSize(horizontal: false, vertical: true)
                                 if let author = pair.quoteAuthor {
                                     Text("— \(author)")
                                         .font(.caption.weight(.medium))
                                         .foregroundColor(Theme.muted)
+                                        .tracking(0.5)
                                 }
                             }
                             .padding(.horizontal, 32)
                             .padding(.top, 32)
+                            .padding(.bottom, 8)
                             .opacity(showButton ? 1 : 0)
+                            .offset(y: showButton ? 0 : 16)
                         }
 
                     }
@@ -247,6 +265,36 @@ private struct DailyPromptCard: View {
                 .fixedSize(horizontal: false, vertical: true)
                 .frame(maxWidth: .infinity, alignment: .leading)
         }
+        .cardStyle()
+    }
+}
+
+private struct ContemplationCard: View {
+    let text: String
+
+    var body: some View {
+        VStack(alignment: .leading, spacing: 14) {
+            HStack(spacing: 8) {
+                Image(systemName: "leaf")
+                    .font(.footnote)
+                Text("Today's Contemplation")
+                    .font(.footnote.weight(.semibold))
+                    .tracking(0.5)
+            }
+            .foregroundColor(Theme.accentDark)
+
+            Rectangle()
+                .fill(Theme.accent.opacity(0.25))
+                .frame(width: 28, height: 2)
+
+            Text(text)
+                .font(.system(size: 17, weight: .regular, design: .serif))
+                .foregroundColor(Theme.ink.opacity(0.85))
+                .lineSpacing(6)
+                .fixedSize(horizontal: false, vertical: true)
+                .frame(maxWidth: .infinity, alignment: .leading)
+        }
+        .frame(maxWidth: .infinity, alignment: .leading)
         .cardStyle()
     }
 }

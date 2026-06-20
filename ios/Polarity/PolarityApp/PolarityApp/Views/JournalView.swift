@@ -68,8 +68,11 @@ struct JournalView: View {
             Spacer(minLength: 80)
 
             Image(systemName: "book.closed")
-                .font(.system(size: 48))
-                .foregroundColor(Theme.muted.opacity(0.4))
+                .font(.system(size: 34))
+                .foregroundColor(Theme.accent.opacity(0.7))
+                .frame(width: 84, height: 84)
+                .background(Theme.accent.opacity(0.08))
+                .clipShape(Circle())
 
             Text("No Entries Yet")
                 .font(.title3.weight(.semibold))

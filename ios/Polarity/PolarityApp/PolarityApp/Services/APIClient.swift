@@ -5,7 +5,7 @@ actor APIClient {
 
     var baseURL: URL = URL(string: "https://polarity-backend-772881056162.us-east1.run.app")!
 
-    private let cacheKey = "cachedWordPairV3"
+    private let cacheKey = "cachedWordPairV4"
 
     private func cachedPairForToday() -> WordPair? {
         guard let data = UserDefaults.standard.data(forKey: cacheKey),
@@ -72,7 +72,8 @@ actor APIClient {
             wordADefinition: response.wordADefinition,
             wordBDefinition: response.wordBDefinition,
             quote: response.quote,
-            quoteAuthor: response.quoteAuthor
+            quoteAuthor: response.quoteAuthor,
+            contemplation: response.contemplation
         )
         cachePair(pair)
         return pair
@@ -92,7 +93,8 @@ actor APIClient {
                 wordADefinition: $0.wordADefinition,
                 wordBDefinition: $0.wordBDefinition,
                 quote: $0.quote,
-                quoteAuthor: $0.quoteAuthor
+                quoteAuthor: $0.quoteAuthor,
+                contemplation: $0.contemplation
             )
         }
     }

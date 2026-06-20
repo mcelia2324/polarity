@@ -26,6 +26,11 @@ struct ContentView: View {
                         Label("History", systemImage: "clock.arrow.circlepath")
                     }
 
+                ConsciousnessMirrorView(journalStore: journalStore)
+                    .tabItem {
+                        Label("Mirror", systemImage: "sparkles")
+                    }
+
                 SettingsView(settings: settings, notificationManager: notificationManager, journalStore: journalStore)
                     .tabItem {
                         Label("Settings", systemImage: "gear")
