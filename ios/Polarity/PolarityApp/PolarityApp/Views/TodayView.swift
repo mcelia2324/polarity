@@ -114,7 +114,7 @@ struct TodayView: View {
                     }
                     .padding(.horizontal, 24)
                     .readableWidth()
-                    .padding(.top, 16)
+                    .padding(.top, 40)
                     .padding(.bottom, 16)
                 } else if isLoading {
                     VStack(spacing: 16) {
