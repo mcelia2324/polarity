@@ -16,7 +16,7 @@ struct PolarityApp: App {
 
     var body: some Scene {
         WindowGroup {
-            ContentView()
+            RootView()
                 .environmentObject(settings)
                 .environmentObject(notificationManager)
                 .environmentObject(journalStore)
@@ -24,6 +24,28 @@ struct PolarityApp: App {
                     appDelegate.notificationManager = notificationManager
                     appDelegate.settingsStore = settings
                 }
+        }
+    }
+}
+
+/// Shows first-run onboarding for brand-new users, otherwise the main app. Existing users
+/// (who already have journal entries) skip onboarding even before the flag is set.
+private struct RootView: View {
+    @EnvironmentObject private var settings: SettingsStore
+    @EnvironmentObject private var notificationManager: NotificationManager
+    @EnvironmentObject private var journalStore: JournalStore
+
+    var body: some View {
+        if settings.hasCompletedOnboarding || !journalStore.entries.isEmpty {
+            ContentView()
+        } else {
+            OnboardingView(
+                settings: settings,
+                journalStore: journalStore,
+                notificationManager: notificationManager
+            ) {
+                withAnimation(.easeInOut) { settings.hasCompletedOnboarding = true }
+            }
         }
     }
 }
