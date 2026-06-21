@@ -77,6 +77,17 @@ struct SettingsView: View {
                             .font(.caption2)
                             .foregroundColor(Theme.muted.opacity(0.7))
                             .multilineTextAlignment(.center)
+                        Text("Inspired by the work of David R. Hawkins. Not affiliated with, or endorsed by, David R. Hawkins or his publishers.")
+                            .font(.caption2)
+                            .foregroundColor(Theme.muted.opacity(0.55))
+                            .multilineTextAlignment(.center)
+                            .padding(.top, 2)
+                        if let version = appVersion {
+                            Text(version)
+                                .font(.caption2)
+                                .foregroundColor(Theme.muted.opacity(0.5))
+                                .padding(.top, 2)
+                        }
                     }
                     .frame(maxWidth: .infinity)
                     .padding(.top, 8)
@@ -100,6 +111,15 @@ struct SettingsView: View {
         Rectangle()
             .fill(Theme.muted.opacity(0.15))
             .frame(height: 1)
+    }
+
+    private var appVersion: String? {
+        let info = Bundle.main.infoDictionary
+        guard let version = info?["CFBundleShortVersionString"] as? String else { return nil }
+        if let build = info?["CFBundleVersion"] as? String {
+            return "Version \(version) (\(build))"
+        }
+        return "Version \(version)"
     }
 }
 
