@@ -11,7 +11,7 @@ struct ConsciousnessMirrorView: View {
     }
 
     var body: some View {
-        NavigationView {
+        NavigationStack {
             ScrollView {
                 Group {
                     if stats.isEmpty {

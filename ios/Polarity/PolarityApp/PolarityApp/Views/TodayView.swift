@@ -17,7 +17,7 @@ struct TodayView: View {
     private var streak: Int { journalStore.currentStreak }
 
     var body: some View {
-        NavigationView {
+        NavigationStack {
         VStack(spacing: 0) {
             ScrollView {
                 if let pair = wordPair {

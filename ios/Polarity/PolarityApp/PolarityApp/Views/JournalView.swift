@@ -18,7 +18,7 @@ struct JournalView: View {
     }
 
     var body: some View {
-        NavigationView {
+        NavigationStack {
             ScrollView {
                 if journalStore.entries.isEmpty {
                     emptyState

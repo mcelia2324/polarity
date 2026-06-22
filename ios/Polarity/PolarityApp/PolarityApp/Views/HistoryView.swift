@@ -8,7 +8,7 @@ struct HistoryView: View {
     @State private var selectedDefinition: HistoryDefinitionItem?
 
     var body: some View {
-        NavigationView {
+        NavigationStack {
             ScrollView {
                 if isLoading && history.isEmpty {
                     VStack(spacing: 16) {
