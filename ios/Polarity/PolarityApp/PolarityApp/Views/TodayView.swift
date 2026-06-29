@@ -6,7 +6,6 @@ struct TodayView: View {
     @State private var errorMessage: String?
     @State private var showJournal = false
     @State private var selectedDefinition: DefinitionSheetItem?
-    @State private var appeared = false
 
     @ObservedObject var journalStore: JournalStore
 
@@ -57,10 +56,29 @@ struct TodayView: View {
         }
     }
 
-    // MARK: - Main content (fits on one screen, no scrolling)
+    // MARK: - Content
+    //
+    // The whole stack is offered at decreasing scales and SwiftUI renders the largest one
+    // that fits, so the screen never scrolls on any device. Each card hugs its own content
+    // (the contemplation box is never stretched), and the chosen stack is centered.
 
     private func content(_ pair: WordPair) -> some View {
-        VStack(spacing: 14) {
+        ViewThatFits(in: .vertical) {
+            stack(pair, textSize: 18, lineSpacing: 7)
+            stack(pair, textSize: 16.5, lineSpacing: 6)
+            stack(pair, textSize: 15, lineSpacing: 5)
+            stack(pair, textSize: 13.5, lineSpacing: 4)
+            stack(pair, textSize: 12, lineSpacing: 3)
+            stack(pair, textSize: 11, lineSpacing: 2)
+        }
+        .frame(maxWidth: .infinity, maxHeight: .infinity, alignment: .center)
+        .padding(.horizontal, 20)
+        .padding(.vertical, 10)
+        .readableWidth()
+    }
+
+    private func stack(_ pair: WordPair, textSize: CGFloat, lineSpacing: CGFloat) -> some View {
+        VStack(spacing: 16) {
             WordPairCard(
                 title: "",
                 subtitle: formattedDate(pair.date),
@@ -80,42 +98,25 @@ struct TodayView: View {
                 },
                 compact: true
             )
+            .gentleAppear(0)
 
             if let contemplation = pair.contemplation, !contemplation.isEmpty {
-                contemplationCard(contemplation)
-            } else {
-                Spacer(minLength: 0)
+                contemplationCard(contemplation, textSize: textSize, lineSpacing: lineSpacing)
+                    .gentleAppear(0.08)
             }
 
             if let quote = pair.quote {
                 quoteView(quote, author: pair.quoteAuthor)
+                    .gentleAppear(0.16)
             }
 
-            Button {
-                showJournal = true
-            } label: {
-                Label("Journal", systemImage: "square.and.pencil")
-                    .font(.system(size: 17, weight: .semibold, design: .rounded))
-                    .padding(.vertical, 13)
-                    .frame(maxWidth: .infinity)
-                    .background(Theme.accent)
-                    .foregroundColor(.white)
-                    .clipShape(Capsule())
-            }
+            journalButton
+                .gentleAppear(0.22)
         }
-        .padding(.horizontal, 20)
-        .padding(.top, 6)
-        .padding(.bottom, 14)
-        .frame(maxWidth: .infinity, maxHeight: .infinity, alignment: .top)
-        .readableWidth()
-        .opacity(appeared ? 1 : 0)
-        .offset(y: appeared ? 0 : 14)
     }
 
-    /// The contemplation fills the remaining vertical space and picks the largest font
-    /// that fits, so the whole screen never needs to scroll on any device.
-    private func contemplationCard(_ text: String) -> some View {
-        VStack(alignment: .leading, spacing: 10) {
+    private func contemplationCard(_ text: String, textSize: CGFloat, lineSpacing: CGFloat) -> some View {
+        VStack(alignment: .leading, spacing: 12) {
             HStack(spacing: 7) {
                 Image(systemName: "leaf.fill")
                     .font(.caption2)
@@ -125,39 +126,28 @@ struct TodayView: View {
             }
             .foregroundColor(Theme.accentDark)
 
-            ViewThatFits(in: .vertical) {
-                contemplationText(text, size: 17, spacing: 6)
-                contemplationText(text, size: 15.5, spacing: 5)
-                contemplationText(text, size: 14, spacing: 4)
-                contemplationText(text, size: 12.5, spacing: 3)
-                contemplationText(text, size: 11, spacing: 2)
-            }
-            .frame(maxWidth: .infinity, maxHeight: .infinity, alignment: .topLeading)
+            Text(text)
+                .font(.system(size: textSize, weight: .regular, design: .serif))
+                .foregroundColor(Theme.ink.opacity(0.9))
+                .lineSpacing(lineSpacing)
+                .fixedSize(horizontal: false, vertical: true)
+                .frame(maxWidth: .infinity, alignment: .leading)
         }
-        .padding(18)
-        .frame(maxWidth: .infinity, maxHeight: .infinity, alignment: .topLeading)
+        .padding(20)
+        .frame(maxWidth: .infinity, alignment: .topLeading)
         .background(
             LinearGradient(
-                colors: [Theme.card, Theme.accent.opacity(0.06)],
-                startPoint: .top,
-                endPoint: .bottom
+                colors: [Theme.card, Theme.accent.opacity(0.07)],
+                startPoint: .topLeading,
+                endPoint: .bottomTrailing
             ),
-            in: RoundedRectangle(cornerRadius: 22, style: .continuous)
+            in: RoundedRectangle(cornerRadius: 24, style: .continuous)
         )
         .overlay(
-            RoundedRectangle(cornerRadius: 22, style: .continuous)
-                .strokeBorder(Theme.accent.opacity(0.12), lineWidth: 1)
+            RoundedRectangle(cornerRadius: 24, style: .continuous)
+                .strokeBorder(Theme.accent.opacity(0.14), lineWidth: 1)
         )
-        .shadow(color: Theme.cardShadow, radius: 18, x: 0, y: 8)
-    }
-
-    private func contemplationText(_ text: String, size: CGFloat, spacing: CGFloat) -> some View {
-        Text(text)
-            .font(.system(size: size, weight: .regular, design: .serif))
-            .foregroundColor(Theme.ink.opacity(0.9))
-            .lineSpacing(spacing)
-            .fixedSize(horizontal: false, vertical: true)
-            .frame(maxWidth: .infinity, alignment: .leading)
+        .shadow(color: Theme.cardShadow, radius: 20, x: 0, y: 10)
     }
 
     private func quoteView(_ quote: String, author: String?) -> some View {
@@ -185,6 +175,21 @@ struct TodayView: View {
             }
         }
         .padding(.horizontal, 12)
+    }
+
+    private var journalButton: some View {
+        Button {
+            showJournal = true
+        } label: {
+            Label("Journal", systemImage: "square.and.pencil")
+                .font(.system(size: 17, weight: .semibold, design: .rounded))
+                .padding(.vertical, 13)
+                .frame(maxWidth: .infinity)
+                .background(Theme.accent)
+                .foregroundColor(.white)
+                .clipShape(Capsule())
+                .shadow(color: Theme.accent.opacity(0.25), radius: 10, x: 0, y: 6)
+        }
     }
 
     private var loadingView: some View {
@@ -238,14 +243,10 @@ struct TodayView: View {
         do {
             isLoading = true
             errorMessage = nil
-            appeared = false
             let pair = try await APIClient.shared.fetchWordOfDay()
             await MainActor.run {
                 self.wordPair = pair
                 self.isLoading = false
-            }
-            withAnimation(.easeOut(duration: 0.5)) {
-                appeared = true
             }
         } catch {
             await MainActor.run {
