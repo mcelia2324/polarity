@@ -18,7 +18,6 @@ struct TodayView: View {
 
     var body: some View {
         NavigationStack {
-        VStack(spacing: 0) {
             ScrollView {
                 if let pair = wordPair {
                     VStack(spacing: 0) {
@@ -46,13 +45,13 @@ struct TodayView: View {
 
                         if let contemplation = pair.contemplation, !contemplation.isEmpty {
                             ContemplationCard(text: contemplation)
-                                .padding(.top, 24)
+                                .padding(.top, 20)
                                 .opacity(showPrompt ? 1 : 0)
                                 .offset(y: showPrompt ? 0 : 24)
                         }
 
                         DailyPromptCard(wordA: pair.wordA, wordB: pair.wordB)
-                            .padding(.top, 20)
+                            .padding(.top, 16)
                             .opacity(showPrompt ? 1 : 0)
                             .offset(y: showPrompt ? 0 : 24)
 
@@ -78,18 +77,33 @@ struct TodayView: View {
                                         .tracking(0.5)
                                 }
                             }
-                            .padding(.horizontal, 32)
-                            .padding(.top, 32)
-                            .padding(.bottom, 8)
+                            .padding(.horizontal, 16)
+                            .padding(.top, 28)
                             .opacity(showButton ? 1 : 0)
                             .offset(y: showButton ? 0 : 16)
                         }
 
+                        // Journal button now flows with the content instead of being pinned,
+                        // so the whole screen reads as one natural scroll.
+                        Button {
+                            showJournal = true
+                        } label: {
+                            Label("Journal", systemImage: "square.and.pencil")
+                                .font(.system(size: 17, weight: .semibold, design: .rounded))
+                                .padding(.vertical, 14)
+                                .frame(maxWidth: .infinity)
+                                .background(Theme.accent)
+                                .foregroundColor(.white)
+                                .clipShape(Capsule())
+                        }
+                        .padding(.top, 28)
+                        .opacity(showButton ? 1 : 0)
+                        .offset(y: showButton ? 0 : 18)
                     }
                     .padding(.horizontal, 24)
                     .readableWidth()
                     .padding(.top, 8)
-                    .padding(.bottom, 16)
+                    .padding(.bottom, 28)
                 } else if isLoading {
                     VStack(spacing: 16) {
                         Spacer(minLength: 120)
@@ -132,49 +146,22 @@ struct TodayView: View {
             .refreshable {
                 await load()
             }
-
-            // Pinned Journal button at bottom
-            if wordPair != nil {
-                Button {
-                    showJournal = true
-                } label: {
-                    Label("Journal", systemImage: "square.and.pencil")
-                        .font(.system(size: 17, weight: .semibold, design: .rounded))
-                        .padding(.vertical, 14)
-                        .frame(maxWidth: .infinity)
-                        .background(Theme.accent)
-                        .foregroundColor(.white)
-                        .clipShape(Capsule())
-                }
-                .padding(.horizontal, 24)
-                .readableWidth()
-                .padding(.top, 18)
-                .opacity(showButton ? 1 : 0)
-                .offset(y: showButton ? 0 : 18)
-
-                Text("Inspired by the work of David R. Hawkins.")
-                    .font(.caption)
-                    .foregroundColor(Theme.muted.opacity(0.5))
-                    .padding(.bottom, 8)
-                    .opacity(showButton ? 1 : 0)
-            }
-        }
-        .navigationTitle("Today")
-        .navigationBarTitleDisplayMode(.large)
-        .toolbar {
-            if streak > 0 {
-                ToolbarItem(placement: .topBarTrailing) {
-                    HStack(spacing: 4) {
-                        Image(systemName: "flame.fill")
-                            .font(.footnote)
-                        Text("\(streak)")
-                            .font(.subheadline.weight(.semibold))
+            .navigationTitle("Today")
+            .navigationBarTitleDisplayMode(.large)
+            .toolbar {
+                if streak > 0 {
+                    ToolbarItem(placement: .topBarTrailing) {
+                        HStack(spacing: 4) {
+                            Image(systemName: "flame.fill")
+                                .font(.footnote)
+                            Text("\(streak)")
+                                .font(.subheadline.weight(.semibold))
+                        }
+                        .foregroundColor(Theme.accent)
+                        .accessibilityLabel("\(streak) day streak")
                     }
-                    .foregroundColor(Theme.accent)
-                    .accessibilityLabel("\(streak) day streak")
                 }
             }
-        }
         }
         .task {
             await load()
