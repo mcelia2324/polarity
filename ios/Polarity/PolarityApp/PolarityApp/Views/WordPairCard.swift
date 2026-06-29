@@ -7,6 +7,7 @@ struct WordPairCard: View {
     let wordB: String
     let onTapWordA: (() -> Void)?
     let onTapWordB: (() -> Void)?
+    var compact: Bool = false
 
     @State private var wordsVisible = false
 
@@ -16,7 +17,8 @@ struct WordPairCard: View {
         wordA: String,
         wordB: String,
         onTapWordA: (() -> Void)? = nil,
-        onTapWordB: (() -> Void)? = nil
+        onTapWordB: (() -> Void)? = nil,
+        compact: Bool = false
     ) {
         self.title = title
         self.subtitle = subtitle
@@ -24,10 +26,14 @@ struct WordPairCard: View {
         self.wordB = wordB
         self.onTapWordA = onTapWordA
         self.onTapWordB = onTapWordB
+        self.compact = compact
     }
 
+    private var wordSize: CGFloat { compact ? 25 : 30 }
+    private var vSpacing: CGFloat { compact ? 10 : 16 }
+
     var body: some View {
-        VStack(spacing: 16) {
+        VStack(spacing: vSpacing) {
             Text(subtitle.uppercased())
                 .font(.caption)
                 .foregroundColor(Theme.muted)
@@ -54,10 +60,12 @@ struct WordPairCard: View {
                     .opacity(wordsVisible ? 1 : 0)
             }
 
-            Text("Tap a word for its definition.")
-                .font(.caption)
-                .foregroundColor(Theme.muted.opacity(0.8))
-                .opacity(wordsVisible ? 1 : 0)
+            if !compact {
+                Text("Tap a word for its definition.")
+                    .font(.caption)
+                    .foregroundColor(Theme.muted.opacity(0.8))
+                    .opacity(wordsVisible ? 1 : 0)
+            }
         }
         .frame(maxWidth: .infinity)
         .cardStyle()
@@ -76,7 +84,7 @@ struct WordPairCard: View {
                 action()
             } label: {
                 Text(label)
-                    .font(.system(size: 30, weight: .semibold, design: .serif))
+                    .font(.system(size: wordSize, weight: .semibold, design: .serif))
                     .foregroundColor(Theme.ink)
                     .lineLimit(1)
                     .minimumScaleFactor(0.6)
@@ -84,7 +92,7 @@ struct WordPairCard: View {
             .buttonStyle(.plain)
         } else {
             Text(label)
-                .font(.system(size: 30, weight: .semibold, design: .serif))
+                .font(.system(size: wordSize, weight: .semibold, design: .serif))
                 .foregroundColor(Theme.ink)
                 .lineLimit(1)
                 .minimumScaleFactor(0.6)

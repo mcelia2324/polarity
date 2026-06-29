@@ -6,11 +6,7 @@ struct TodayView: View {
     @State private var errorMessage: String?
     @State private var showJournal = false
     @State private var selectedDefinition: DefinitionSheetItem?
-
-    // Animation states
-    @State private var showCard = false
-    @State private var showPrompt = false
-    @State private var showButton = false
+    @State private var appeared = false
 
     @ObservedObject var journalStore: JournalStore
 
@@ -18,133 +14,14 @@ struct TodayView: View {
 
     var body: some View {
         NavigationStack {
-            ScrollView {
+            Group {
                 if let pair = wordPair {
-                    VStack(spacing: 0) {
-                        WordPairCard(
-                            title: "",
-                            subtitle: formattedDate(pair.date),
-                            wordA: pair.wordA,
-                            wordB: pair.wordB,
-                            onTapWordA: {
-                                selectedDefinition = DefinitionSheetItem(
-                                    word: pair.wordA,
-                                    definition: pair.wordADefinition ?? "Definition unavailable."
-                                )
-                            },
-                            onTapWordB: {
-                                selectedDefinition = DefinitionSheetItem(
-                                    word: pair.wordB,
-                                    definition: pair.wordBDefinition ?? "Definition unavailable."
-                                )
-                            }
-                        )
-                        .padding(.top, 12)
-                        .opacity(showCard ? 1 : 0)
-                        .offset(y: showCard ? 0 : 30)
-
-                        if let contemplation = pair.contemplation, !contemplation.isEmpty {
-                            ContemplationCard(text: contemplation)
-                                .padding(.top, 20)
-                                .opacity(showPrompt ? 1 : 0)
-                                .offset(y: showPrompt ? 0 : 24)
-                        }
-
-                        DailyPromptCard(wordA: pair.wordA, wordB: pair.wordB)
-                            .padding(.top, 16)
-                            .opacity(showPrompt ? 1 : 0)
-                            .offset(y: showPrompt ? 0 : 24)
-
-                        // Daily quote
-                        if let quote = pair.quote {
-                            VStack(spacing: 12) {
-                                Rectangle()
-                                    .fill(Theme.muted.opacity(0.2))
-                                    .frame(width: 40, height: 1)
-                                    .padding(.bottom, 4)
-
-                                Text("\u{201C}\(quote)\u{201D}")
-                                    .font(.system(size: 18, weight: .regular, design: .serif))
-                                    .italic()
-                                    .foregroundColor(Theme.ink.opacity(0.7))
-                                    .multilineTextAlignment(.center)
-                                    .lineSpacing(4)
-                                    .fixedSize(horizontal: false, vertical: true)
-                                if let author = pair.quoteAuthor {
-                                    Text(author)
-                                        .font(.caption.weight(.medium))
-                                        .foregroundColor(Theme.muted)
-                                        .tracking(0.5)
-                                }
-                            }
-                            .padding(.horizontal, 16)
-                            .padding(.top, 28)
-                            .opacity(showButton ? 1 : 0)
-                            .offset(y: showButton ? 0 : 16)
-                        }
-
-                        // Journal button now flows with the content instead of being pinned,
-                        // so the whole screen reads as one natural scroll.
-                        Button {
-                            showJournal = true
-                        } label: {
-                            Label("Journal", systemImage: "square.and.pencil")
-                                .font(.system(size: 17, weight: .semibold, design: .rounded))
-                                .padding(.vertical, 14)
-                                .frame(maxWidth: .infinity)
-                                .background(Theme.accent)
-                                .foregroundColor(.white)
-                                .clipShape(Capsule())
-                        }
-                        .padding(.top, 28)
-                        .opacity(showButton ? 1 : 0)
-                        .offset(y: showButton ? 0 : 18)
-                    }
-                    .padding(.horizontal, 24)
-                    .readableWidth()
-                    .padding(.top, 8)
-                    .padding(.bottom, 28)
+                    content(pair)
                 } else if isLoading {
-                    VStack(spacing: 16) {
-                        Spacer(minLength: 120)
-                        ProgressView()
-                            .tint(Theme.accent)
-                            .scaleEffect(1.5)
-                        Text("Loading today's polarity…")
-                            .font(.subheadline)
-                            .foregroundColor(Theme.muted)
-                    }
-                    .frame(maxWidth: .infinity)
+                    loadingView
                 } else {
-                    VStack(spacing: 16) {
-                        Spacer(minLength: 120)
-                        Image(systemName: "wifi.slash")
-                            .font(.system(size: 40))
-                            .foregroundColor(Theme.muted.opacity(0.4))
-                        Text(errorMessage ?? "Unable to load today's words.")
-                            .font(.subheadline)
-                            .foregroundColor(Theme.muted)
-                            .multilineTextAlignment(.center)
-                        Button {
-                            Task { await load() }
-                        } label: {
-                            Label("Try Again", systemImage: "arrow.clockwise")
-                                .font(.system(size: 15, weight: .semibold, design: .rounded))
-                                .padding(.horizontal, 24)
-                                .padding(.vertical, 10)
-                                .background(Theme.accent)
-                                .foregroundColor(.white)
-                                .clipShape(Capsule())
-                        }
-                    }
-                    .frame(maxWidth: .infinity)
+                    errorView
                 }
-            }
-            .scrollIndicators(.hidden)
-            .scrollContentBackground(.hidden)
-            .background(Color.clear)
-            .refreshable {
-                await load()
             }
             .navigationTitle("Today")
             .navigationBarTitleDisplayMode(.large)
@@ -163,9 +40,7 @@ struct TodayView: View {
                 }
             }
         }
-        .task {
-            await load()
-        }
+        .task { await load() }
         .sheet(isPresented: $showJournal) {
             if let pair = wordPair {
                 JournalEditorView(
@@ -182,6 +57,173 @@ struct TodayView: View {
         }
     }
 
+    // MARK: - Main content (fits on one screen, no scrolling)
+
+    private func content(_ pair: WordPair) -> some View {
+        VStack(spacing: 14) {
+            WordPairCard(
+                title: "",
+                subtitle: formattedDate(pair.date),
+                wordA: pair.wordA,
+                wordB: pair.wordB,
+                onTapWordA: {
+                    selectedDefinition = DefinitionSheetItem(
+                        word: pair.wordA,
+                        definition: pair.wordADefinition ?? "Definition unavailable."
+                    )
+                },
+                onTapWordB: {
+                    selectedDefinition = DefinitionSheetItem(
+                        word: pair.wordB,
+                        definition: pair.wordBDefinition ?? "Definition unavailable."
+                    )
+                },
+                compact: true
+            )
+
+            if let contemplation = pair.contemplation, !contemplation.isEmpty {
+                contemplationCard(contemplation)
+            } else {
+                Spacer(minLength: 0)
+            }
+
+            if let quote = pair.quote {
+                quoteView(quote, author: pair.quoteAuthor)
+            }
+
+            Button {
+                showJournal = true
+            } label: {
+                Label("Journal", systemImage: "square.and.pencil")
+                    .font(.system(size: 17, weight: .semibold, design: .rounded))
+                    .padding(.vertical, 13)
+                    .frame(maxWidth: .infinity)
+                    .background(Theme.accent)
+                    .foregroundColor(.white)
+                    .clipShape(Capsule())
+            }
+        }
+        .padding(.horizontal, 20)
+        .padding(.top, 6)
+        .padding(.bottom, 14)
+        .frame(maxWidth: .infinity, maxHeight: .infinity, alignment: .top)
+        .readableWidth()
+        .opacity(appeared ? 1 : 0)
+        .offset(y: appeared ? 0 : 14)
+    }
+
+    /// The contemplation fills the remaining vertical space and picks the largest font
+    /// that fits, so the whole screen never needs to scroll on any device.
+    private func contemplationCard(_ text: String) -> some View {
+        VStack(alignment: .leading, spacing: 10) {
+            HStack(spacing: 7) {
+                Image(systemName: "leaf.fill")
+                    .font(.caption2)
+                Text("TODAY'S CONTEMPLATION")
+                    .font(.caption2.weight(.semibold))
+                    .tracking(1.6)
+            }
+            .foregroundColor(Theme.accentDark)
+
+            ViewThatFits(in: .vertical) {
+                contemplationText(text, size: 17, spacing: 6)
+                contemplationText(text, size: 15.5, spacing: 5)
+                contemplationText(text, size: 14, spacing: 4)
+                contemplationText(text, size: 12.5, spacing: 3)
+                contemplationText(text, size: 11, spacing: 2)
+            }
+            .frame(maxWidth: .infinity, maxHeight: .infinity, alignment: .topLeading)
+        }
+        .padding(18)
+        .frame(maxWidth: .infinity, maxHeight: .infinity, alignment: .topLeading)
+        .background(
+            LinearGradient(
+                colors: [Theme.card, Theme.accent.opacity(0.06)],
+                startPoint: .top,
+                endPoint: .bottom
+            ),
+            in: RoundedRectangle(cornerRadius: 22, style: .continuous)
+        )
+        .overlay(
+            RoundedRectangle(cornerRadius: 22, style: .continuous)
+                .strokeBorder(Theme.accent.opacity(0.12), lineWidth: 1)
+        )
+        .shadow(color: Theme.cardShadow, radius: 18, x: 0, y: 8)
+    }
+
+    private func contemplationText(_ text: String, size: CGFloat, spacing: CGFloat) -> some View {
+        Text(text)
+            .font(.system(size: size, weight: .regular, design: .serif))
+            .foregroundColor(Theme.ink.opacity(0.9))
+            .lineSpacing(spacing)
+            .fixedSize(horizontal: false, vertical: true)
+            .frame(maxWidth: .infinity, alignment: .leading)
+    }
+
+    private func quoteView(_ quote: String, author: String?) -> some View {
+        VStack(spacing: 7) {
+            Rectangle()
+                .fill(Theme.muted.opacity(0.2))
+                .frame(width: 36, height: 1)
+                .padding(.bottom, 2)
+
+            Text("\u{201C}\(quote)\u{201D}")
+                .font(.system(size: 15, weight: .regular, design: .serif))
+                .italic()
+                .foregroundColor(Theme.ink.opacity(0.7))
+                .multilineTextAlignment(.center)
+                .lineSpacing(3)
+                .minimumScaleFactor(0.7)
+                .lineLimit(3)
+                .fixedSize(horizontal: false, vertical: true)
+
+            if let author {
+                Text(author)
+                    .font(.caption2.weight(.medium))
+                    .foregroundColor(Theme.muted)
+                    .tracking(0.5)
+            }
+        }
+        .padding(.horizontal, 12)
+    }
+
+    private var loadingView: some View {
+        VStack(spacing: 16) {
+            ProgressView()
+                .tint(Theme.accent)
+                .scaleEffect(1.5)
+            Text("Loading today's polarity…")
+                .font(.subheadline)
+                .foregroundColor(Theme.muted)
+        }
+        .frame(maxWidth: .infinity, maxHeight: .infinity)
+    }
+
+    private var errorView: some View {
+        VStack(spacing: 16) {
+            Image(systemName: "wifi.slash")
+                .font(.system(size: 40))
+                .foregroundColor(Theme.muted.opacity(0.4))
+            Text(errorMessage ?? "Unable to load today's words.")
+                .font(.subheadline)
+                .foregroundColor(Theme.muted)
+                .multilineTextAlignment(.center)
+            Button {
+                Task { await load() }
+            } label: {
+                Label("Try Again", systemImage: "arrow.clockwise")
+                    .font(.system(size: 15, weight: .semibold, design: .rounded))
+                    .padding(.horizontal, 24)
+                    .padding(.vertical, 10)
+                    .background(Theme.accent)
+                    .foregroundColor(.white)
+                    .clipShape(Capsule())
+            }
+        }
+        .frame(maxWidth: .infinity, maxHeight: .infinity)
+        .padding(.horizontal, 32)
+    }
+
     private func formattedDate(_ raw: String) -> String {
         let parser = DateFormatter()
         parser.dateFormat = "yyyy-MM-dd"
@@ -196,26 +238,14 @@ struct TodayView: View {
         do {
             isLoading = true
             errorMessage = nil
-            // Reset animations for fresh entrance
-            showCard = false
-            showPrompt = false
-            showButton = false
+            appeared = false
             let pair = try await APIClient.shared.fetchWordOfDay()
             await MainActor.run {
                 self.wordPair = pair
                 self.isLoading = false
             }
-            // Staggered entrance animations
-            withAnimation(.spring(response: 0.6, dampingFraction: 0.8)) {
-                showCard = true
-            }
-            try? await Task.sleep(nanoseconds: 200_000_000)
-            withAnimation(.spring(response: 0.5, dampingFraction: 0.8)) {
-                showPrompt = true
-            }
-            try? await Task.sleep(nanoseconds: 150_000_000)
-            withAnimation(.spring(response: 0.5, dampingFraction: 0.8)) {
-                showButton = true
+            withAnimation(.easeOut(duration: 0.5)) {
+                appeared = true
             }
         } catch {
             await MainActor.run {
@@ -223,70 +253,6 @@ struct TodayView: View {
                 self.isLoading = false
             }
         }
-    }
-}
-
-private struct DailyPromptCard: View {
-    let wordA: String
-    let wordB: String
-
-    private var prompt: String {
-        "What one action today would move you from \(wordB.capitalized) toward \(wordA.capitalized)?"
-    }
-
-    var body: some View {
-        VStack(spacing: 10) {
-            Label("Reflection Prompt", systemImage: "sparkles")
-                .font(.footnote.weight(.semibold))
-                .foregroundColor(Theme.accentDark)
-                .frame(maxWidth: .infinity, alignment: .leading)
-
-            Text(prompt)
-                .font(.subheadline)
-                .foregroundColor(Theme.muted)
-                .fixedSize(horizontal: false, vertical: true)
-                .frame(maxWidth: .infinity, alignment: .leading)
-        }
-        .cardStyle()
-    }
-}
-
-private struct ContemplationCard: View {
-    let text: String
-
-    var body: some View {
-        VStack(alignment: .leading, spacing: 14) {
-            HStack(spacing: 7) {
-                Image(systemName: "leaf.fill")
-                    .font(.caption2)
-                Text("TODAY'S CONTEMPLATION")
-                    .font(.caption2.weight(.semibold))
-                    .tracking(1.6)
-            }
-            .foregroundColor(Theme.accentDark)
-
-            Text(text)
-                .font(.system(size: 17, weight: .regular, design: .serif))
-                .foregroundColor(Theme.ink.opacity(0.9))
-                .lineSpacing(7)
-                .fixedSize(horizontal: false, vertical: true)
-                .frame(maxWidth: .infinity, alignment: .leading)
-        }
-        .padding(22)
-        .frame(maxWidth: .infinity, alignment: .leading)
-        .background(
-            LinearGradient(
-                colors: [Theme.card, Theme.accent.opacity(0.06)],
-                startPoint: .top,
-                endPoint: .bottom
-            ),
-            in: RoundedRectangle(cornerRadius: 22, style: .continuous)
-        )
-        .overlay(
-            RoundedRectangle(cornerRadius: 22, style: .continuous)
-                .strokeBorder(Theme.accent.opacity(0.12), lineWidth: 1)
-        )
-        .shadow(color: Theme.cardShadow, radius: 18, x: 0, y: 8)
     }
 }
 
